@@ -4,17 +4,15 @@ const router = require("./routes");
 
 app.use(express.json()); //must be before middleware/routes ... this attaches way to access
 
-// Assignment: Your localhost:3000 should show your actuator message: "Service is up"
-// Assignment: DON'T FORGET TO STORE - Implement in-memory data storage define an array or other data type
-
+// **Assignment: Your localhost:3000 should show your actuator message: "Service is up"
 //below is actuator msg
 app.get("/", (req, res) => {
   console.log("GET");
-  res.json({ message: "Service is up and running" });
+  res.json({ message: "Woo Hoo! Service is up and running!" });
 });
 
 //middleware
-app.use("/api", router);
+app.use("/api/", router);
 //rest of routes
 
 //underneath routes add in more middleware for errors
@@ -25,11 +23,12 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  //err = req
-  //   console.log("ERROR >>>", err);
-  res
-    .status(err.status || 500)
-    .json({ message: err.message, status: err.status });
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message,
+      status: err.status || 500,
+    },
+  });
 });
 
 module.exports = app;
