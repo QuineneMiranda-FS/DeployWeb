@@ -37,8 +37,6 @@ router.get("/:id", (req, res) => {
 
 // POST
 router.post("/", (req, res) => {
-  // console.log("Received body:", req.body);
-
   const { name, city } = req.body.data;
 
   if (!name || !city) {
