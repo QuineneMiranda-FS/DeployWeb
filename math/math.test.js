@@ -1,22 +1,42 @@
 const {
   add,
   subtract,
-  divide,
   multiply,
+  divide,
   squareRoot,
   maxNum,
 } = require("./math");
 
 describe("testing math", () => {
   test("take in 2 numbers and return the sum", () => {
-    //
-    expect(add("")).toBe("");
+    //add
+    expect(add(1, 2)).toBe(3);
+  });
+
+  test("take in 2 parameters and return the difference", () => {
+    //subtract
+    expect(subtract(7, 4)).toBe(3);
+  });
+
+  test("take in 2 numbers and return the product", () => {
+    //multiply
+    expect(multiply(5, 5)).toBe(25);
+  });
+
+  test("take in 2 parameters and return the quotient", () => {
+    //divide
+    expect(divide(10, 2)).toBe(5);
+  });
+
+  //   (Use Math's sqrt function)
+  test("take in a number and return the square root", () => {
+    //square root
+    expect(squareRoot(16)).toBe(4);
+  });
+
+  //   (Use Math's max function)
+  test("take in 2 parameters and return the max", () => {
+    //max num
+    expect(maxNum(101, 50)).toBe(101);
   });
 });
-
-// Your subtract function will take in 2 parameters and return the difference
-// Your multiply function will take in 2 numbers and return the product
-// Your divide function will take in 2 parameters and return the quotient
-// Also, write 2 additional tests using JavaScript's Math Object. The two tests will be square root and max.
-// Your sqrt function will take in a number and return the square root - (Use Math's sqrt function)
-// Your max function will take in 2 parameters and return the max. - (Use Math's max function)
