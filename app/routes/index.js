@@ -12,6 +12,7 @@ const timeZones = [
 
 // GET ALL
 router.get("/", (req, res) => {
+  //ok
   res.status(200).json({
     message: "GET to API. This is the Timezones Route",
     data: timeZones,
@@ -56,6 +57,7 @@ router.post("/", (req, res) => {
     data: newTimeZone,
   });
 });
+
 //PUT (aka UPDATE) by ID
 router.put("/:id", (req, res) => {
   const id = Number(req.params.id);
