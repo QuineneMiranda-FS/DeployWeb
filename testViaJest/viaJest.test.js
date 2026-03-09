@@ -7,3 +7,21 @@
 // Also, write 2 additional tests using JavaScript's Math Object. The two tests will be square root and max.
 // Your sqrt function will take in a number and return the square root - (Use Math's sqrt function)
 // Your max function will take in 2 parameters and return the max. - (Use Math's max function)
+
+const { uppercase, lowercase } = require("./viaJest");
+
+describe("testing string", () => {
+  //
+  test("should uppercase a string input", () => {
+    // long way://
+    // const result = uppercase("bob");
+    // expect(result).toBe("BOB");
+
+    //can make abv one line:
+    expect(uppercase("bob")).toBe("BOB");
+  });
+  test("should lowercase a string", () => {
+    //
+    expect(lowercase("FULL Sail")).toBe("full sail");
+  });
+});
