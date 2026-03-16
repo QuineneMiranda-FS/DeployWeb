@@ -11,7 +11,7 @@ const {
   deleteTimeZoneByID,
 } = require("../controllers/timeZonesController");
 
-//GET all by TZ Name
+//GET all Timezones
 router.get("/", getAllTimeZones);
 
 //GET by ID
