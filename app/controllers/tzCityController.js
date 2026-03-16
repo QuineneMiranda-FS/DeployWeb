@@ -35,7 +35,7 @@ const createTZCities = (req, res) => {
   //
   res.status(200).json({
     success: true,
-    message: `{req.method} - request to Timezone Name endpoint`,
+    message: `{req.method} - request to Timezone City endpoint`,
   });
 };
 
