@@ -1,21 +1,18 @@
 const express = require("express");
 const app = express();
-const router = require("./routes");
+// Import the routes
+const routehandler = require("./routes");
 
-app.use(express.json()); //must be before middleware/routes ... this attaches way to access
-
-// **Assignment: Your localhost:3000 should show your actuator message: "Service is up"
-//below is actuator msg
 app.get("/", (req, res) => {
-  console.log("GET");
-  res.json({ message: "Woo Hoo! Service is up and running!" });
+  res.status(200).json({
+    message: "Woo Hoo! Service is up and running!",
+    success: true,
+  });
 });
 
-//middleware
-app.use("/api/", router);
-//rest of routes
+app.use("/api", routehandler);
 
-//underneath routes add in more middleware for errors
+// Error handling middleware
 app.use((req, res, next) => {
   const error = new Error("Not Found");
   error.status = 404;
