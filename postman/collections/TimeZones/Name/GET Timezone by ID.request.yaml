@@ -1,5 +1,28 @@
 $kind: http-request
 name: GET Timezone by ID
-url: http://localhost:3000/api/timezones/69b8a8682ee74e2a0daf2a6a
+url: http://localhost:3000/api/timezones/69b8a9682ee74e2a0daf2a6f
 method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      //TEST 1
+      //main get by ID test status
+      pm.test("Status code is 200 (ok)", function () {
+          pm.response.to.have.status(200);
+      });
+      //TEST 2
+      //check if id requested is match to response
+      pm.test("Response has the correct ID", function () {
+          const jsonData = pm.response.json();
+        //  console.log(jsonData); //show exact structure where id is
+          pm.expect(jsonData.data._id).to.eql("69b8a9682ee74e2a0daf2a6f");
+      });
+      //TEST 3
+      //check other fields of id requested
+      pm.test("Response body has required fields", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData.data).to.have.property('name');
+          pm.expect(jsonData.data).to.have.property('fullName');
+      });
+    language: text/javascript
 order: 4293564739511912

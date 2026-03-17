@@ -1,0 +1,383 @@
+{
+  "info": {
+    "_postman_id": "timezones-collection-export",
+    "name": "TimeZones",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET API Root",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"data\":{\"name\":\"WET\",\"city\":\"London\"}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", ""]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Location",
+      "item": [
+        {
+          "name": "GET ALL Locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/locations/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "locations", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST New Location",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"cityName\":\"LDN\",\"fullCityName\":\"London\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/locations",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "locations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Location by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/locations/69b8afae3365fca68f240cec",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "locations", "69b8afae3365fca68f240cec"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Location by ID",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullCityName\":\"London, UK\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/locations/69b8afae3365fca68f240cec",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "locations", "69b8afae3365fca68f240cec"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Location by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/locations/69b8afae3365fca68f240cec",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "locations", "69b8afae3365fca68f240cec"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Name",
+      "item": [
+        {
+          "name": "GET All Timezones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//TEST 1",
+                  "//main get all test status",
+                  "pm.test(\"Status code is 200 (ok)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/timezones",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "timezones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST New Timezone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//TEST 1",
+                  "//main create test status",
+                  "pm.test(\"Status code is 201 (Created)\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "//TEST 2",
+                  "//test created ID",
+                  "//responseBody is requestBody",
+                  "//24 is length of mongo IDs",
+                  "pm.test(\"Response has created an ID\", function() {",
+                  "    const responseBody = pm.response.json();",
+                  "    pm.expect(responseBody.data).to.have.property(\"_id\").that.is.not.null;",
+                  "    pm.expect(responseBody.data._id).to.have.lengthOf(24);",
+                  "    //this makes the test automation run ... std key value pairing",
+                  "    pm.collectionVariables.set(\"timezoneID\", responseBody.data._id);",
+                  "});",
+                  "//TEST 3",
+                  "pm.test(\"The response has all properties\", () => {",
+                  "    //parse the response JSON and test 3 properties",
+                  "    const responseBody = pm.response.json();",
+                  "    const { data } = responseBody;",
+                  "    pm.expect(data.name).to.be.a('string');",
+                  "    pm.expect(data.fullName).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"GMT\",\"fullName\":\"London\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/timezones",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "timezones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Timezone by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//TEST 1",
+                  "//main get by ID test status",
+                  "pm.test(\"Status code is 200 (ok)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "//TEST 2",
+                  "//check if id requested is match to response",
+                  "pm.test(\"Response has the correct ID\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "  //  console.log(jsonData); //show exact structure where id is",
+                  "    pm.expect(jsonData.data._id).to.eql(\"69b8a9682ee74e2a0daf2a6f\");",
+                  "});",
+                  "//TEST 3",
+                  "//check other fields of id requested",
+                  "pm.test(\"Response body has required fields\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('name');",
+                  "    pm.expect(jsonData.data).to.have.property('fullName');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/timezones/69b8eb6507e63e77c935bda8",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "timezones", "69b8eb6507e63e77c935bda8"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Timezone by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//TEST 1",
+                  "//main update test status",
+                  "pm.test(\"Status code is 200 (Updated OK)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "//TEST 2",
+                  "//make sure ID is one wanted to update so don't overwrite wrong one",
+                  "pm.test(\"Updated resource ID matches requested ID\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var expectedId = pm.collectionVariables.get(\"id\"); ",
+                  "    pm.expect(jsonData.id).to.eql(expectedId);",
+                  "});",
+                  "//TEST 3",
+                  "//for ID that doesn't exist //FAIL IS PASS ",
+                  "pm.test(\"Status code is 404 for invalid ID\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"data\": {\"fulName\": \"Greenwich Mean Time\"}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/timezones/69b8eb6507e63e77c935bda8",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "timezones", "69b8eb6507e63e77c935bda8"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Timezone by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//TEST 1",
+                  "//general status ok",
+                  "pm.test(\"Status code is 200 (Deleted OK)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "//TEST 2",
+                  "//test for non existing ID FAIL is PASS",
+                  "pm.test(\"Status code is 404 for non-existent ID\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "//TEST 3",
+                  "//make sure doesn't take long",
+                  "pm.test(\"Response time is quick\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500); //this is 500ms",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/timezones/69b8eb6507e63e77c935bda8",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "timezones", "69b8eb6507e63e77c935bda8"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "timezoneID",
+      "value": ""
+    }
+  ]
+}

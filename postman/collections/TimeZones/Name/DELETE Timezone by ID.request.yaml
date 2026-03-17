@@ -1,7 +1,27 @@
 $kind: http-request
-url: http://localhost:3000/api/timezones/69b8a8682ee74e2a0daf2a6a
+name: DELETE Timezone by ID
+url: http://localhost:3000/api/timezones/69b8cd8db9869a8f7b19e15f
 method: DELETE
 body:
   type: json
   content: ""
+scripts:
+  - type: afterResponse
+    code: |-
+      //TEST 1
+      //general status ok
+      pm.test("Status code is 200 (Deleted OK)", function () {
+          pm.response.to.have.status(200);
+      });
+      //TEST 2
+      //test for non existing ID FAIL is PASS
+      pm.test("Status code is 404 for non-existent ID", function () {
+          pm.response.to.have.status(404);
+      });
+      //TEST 3
+      //make sure doesn't take long
+      pm.test("Response time is quick", function () {
+          pm.expect(pm.response.responseTime).to.be.below(500); //this is 500ms
+      });
+    language: text/javascript
 order: 4475078369988304

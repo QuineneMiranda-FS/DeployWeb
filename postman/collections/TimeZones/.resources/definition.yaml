@@ -1,2 +1,4 @@
 $kind: collection
 name: TimeZones
+variables:
+  timezoneID: ""
