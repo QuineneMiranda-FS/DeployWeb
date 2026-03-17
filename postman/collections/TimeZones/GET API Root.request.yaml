@@ -1,0 +1,8 @@
+$kind: http-request
+name: GET API Root
+url: http://localhost:3000/api/
+method: GET
+body:
+  type: json
+  content: '{"data":{"name":"WET","city":"London"}}'
+order: 4455418897485484

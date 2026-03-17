@@ -1,0 +1,8 @@
+$kind: http-request
+name: Update Timezone by ID
+url: http://localhost:3000/api/timezones/69b8a8682ee74e2a0daf2a6a
+method: PUT
+body:
+  type: json
+  content: '{"data": {"fulName": "Japan Standard Time"}}'
+order: 4472874390649173

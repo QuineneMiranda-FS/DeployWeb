@@ -18,13 +18,14 @@ app.get("/", (req, res) => {
 
 app.use("/api", routeHandler);
 
-// Error handling middleware **must be underneath
+// 404 Handler
 app.use((req, res, next) => {
   const error = new Error("Not Found");
   error.status = 404;
   next(error);
 });
 
+// Global Error Handler
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     error: {

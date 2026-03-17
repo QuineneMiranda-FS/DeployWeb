@@ -1,33 +1,38 @@
-const timeZonesModel = require("../models/timeZonesModel");
-const tzNameModel = require("../models/timeZonesModel");
+const timeZonesModel = require("../models/TimeZonesModel");
 
-// GET All TZ Names
-const getAllTimeZones = async (req, res) => {
+const { timeZones: mockTimeZones } = require("../db/mockdata");
+
+const getAllTimeZones = async (req, res, next) => {
   try {
-    const timeZones = await timeZonesModel.find({});
+    const dbData = await timeZonesModel.find({});
+
+    const dataToSend = dbData.length > 0 ? dbData : mockTimeZones;
+
+    //200 = ok
     res.status(200).json({
-      data: timeZone,
       success: true,
-      message: `${req.method} - request to Timezone endpoint`,
+      data: dataToSend,
+      message: `${req.method} - request successful`,
+      metadata: { hostname: req.hostname, method: req.method },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// GET TZ Names by ID
-const getTimeZonesById = async (req, res) => {
+// GET TimeZone by ID
+const getTimeZoneById = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
-    const timeZone = timeZones.find((tz) => tz.id === id);
-    //404 for errors
+    const { id } = req.params;
+
+    const timeZone = await timeZonesModel.findById(id);
+
     if (!timeZone) {
       return res.status(404).json({ message: `Timezone ID: ${id} not found.` });
     }
-    //200 for ok
+
     res.status(200).json({
       success: true,
-      message: `GET by ID ${id} Successful to Timezone Name endpoint`,
       data: timeZone,
       metadata: { hostname: req.hostname, method: req.method },
     });
@@ -36,56 +41,59 @@ const getTimeZonesById = async (req, res) => {
   }
 };
 
-// PUT by ID
-const updateTimezonesById = async (req, res) => {
+// POST (Create)
+const createTimezone = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const tzName = await tzNameModel.findByIdAndUpdate(id, req.body, {
-      new: true,
+    const { name, fullName, offset } = req.body;
+
+    if (!name || !fullName) {
+      return res
+        .status(400)
+        .json({ message: "Name and fullName are required" });
+    }
+
+    // Change for Mongo Generates ID automatically
+    //just having it automate an ID
+    // const newTimeZone = {
+    //   id: Math.floor(1000 + Math.random() * 9000),
+    //   name: name,
+    //   city: city,
+    // };
+    const newRecord = await timeZonesModel.create({
+      name,
+      fullName,
+      offset,
     });
-    res.status(200).json({
-      data: tzName,
+
+    res.status(201).json({
       success: true,
-      message: `${req.method} - request to Timezone Name endpoint`,
+      data: newRecord,
+      message: "Timezone created successfully",
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// POST
-(req, res) => {
-  const { name, city } = req.body.data;
-
-  if (!name || !city) {
-    return res.status(400).json({ message: "Name and City are required" });
-  }
-  //just having it automate an ID
-  const newTimeZone = {
-    id: Math.floor(1000 + Math.random() * 9000),
-    name: name,
-    city: city,
-  };
-
-  timeZones.push(newTimeZone);
-  //201 ok created something
-  res.status(201).json({
-    message: `Added new timezone: ${name}`,
-    data: newTimeZone,
-  });
-};
-const createTimezones = async (req, res) => {
+// PUT by ID
+const updateTimezoneById = async (req, res, next) => {
   try {
-    const { timeZone } = req.body.data;
-    if (!name || !city) {
-      return res.status(400).json({ message: "Name and City are required" });
-    }
-    const newTimeZone = await timeZonesModel.create({ timeZone });
+    const { id } = req.params;
 
-    res.status(201).json({
+    const updatedTZ = await timeZonesModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedTZ) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Record not found" });
+    }
+
+    res.status(200).json({
       success: true,
-      data: newRecord,
-      message: `${req.method} - request to Timezone Name endpoint`,
+      data: updatedTZ,
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -93,10 +101,10 @@ const createTimezones = async (req, res) => {
 };
 
 // DELETE by ID
-const deleteTZNamesByID = async (req, res) => {
+const deleteTimezoneByID = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deletedRecord = await tzNameModel.findByIdAndDelete(id);
+    const deletedRecord = await timeZonesModel.findByIdAndDelete(id);
 
     if (!deletedRecord) {
       return res
@@ -105,9 +113,8 @@ const deleteTZNamesByID = async (req, res) => {
     }
 
     res.status(200).json({
-      id,
       success: true,
-      message: `${req.method} - Record deleted successfully`,
+      message: `ID ${id} deleted successfully`,
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -115,11 +122,9 @@ const deleteTZNamesByID = async (req, res) => {
 };
 
 module.exports = {
-  createTZNames,
-  getAllTZNames,
-  getTZNamesById,
-  updateTZNamesById,
-  deleteTZNamesByID,
+  getAllTimeZones,
+  getTimeZoneById,
+  createTimezone,
+  updateTimezoneById,
+  deleteTimezoneByID,
 };
-
-//fix catch errors by adding in next

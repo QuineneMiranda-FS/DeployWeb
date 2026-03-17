@@ -1,38 +1,43 @@
 const mongoose = require("mongoose");
 
-const tzNameSchema = new mongoose.Schema(
+const timeZoneSchema = new mongoose.Schema(
   {
-    // properties of TZ names
+    // abbreviation
     name: {
       type: String,
-      //[value, error msg]
-      required: [true, "Timezone must have a name"],
-      unique: true,
+      required: [true, "Abbreviated name is required"],
       trim: true, //takes space away fm before and after
+      uppercase: true, // make sure abbreviation all uppercase
       minLength: [3, "Name needs to be at least 3 characters"],
-      maxLength: [5, "Name CANNOT be more than 5 characters"], //most are 3-4
+      maxLength: [6, "Name CANNOT be more than 6 characters"], //most are 3-4
     },
+
+    // The Full Name of TimeZone aka IANA
     fullName: {
       type: String,
-      required: [true, "Timezone must have a name"],
+      required: [true, "Full name is required"],
       unique: true,
-      trim: true, //takes space away fm before and after
+      trim: true,
       minLength: [3, "Name needs to be at least 3 characters"],
-      maxLength: [168, "Name CANNOT be more than 168 characters"], //longest named city is 168 characters
+      maxLength: [38, "Name CANNOT be more than 38 characters"], //longest named city is 168 characters but std db sets 38 max
+    },
+    // **Debating... want to actually pull the time from library dynamically**
+    // time: {
+    //   type: String,
+    //   // required: [true, "Local time is required"],
+    //   match: [/^\d{2}:\d{2}$/, "Time must be in HH:MM format"],
+    // },
+    //**FIX/CHECK not sure on this cuz hello regex... ugh
+    offset: {
+      type: String,
+      // required: true,
+      match: [/^[+-]\d{2}:\d{2}$/, "Offset must be in +/-HH:MM format"],
     },
   },
-  { timestamps: true }, //adds to mongo
+  { timestamps: true },
 );
 
-module.exports = mongoose.model("tzName", tzNameSchema);
+module.exports = mongoose.model("TimeZone", timeZoneSchema);
 
-//rules:
-// type specifies the data type of the field (e.g., String, Number).
-// required ensures that the field is mandatory.
-// minLength and maxLength define the length constraints for strings.
-// unique ensures that the value for the field is unique across documents.
-// match enforces a regular expression pattern for string validation.
-// min and max set minimum and maximum numerical values.
-
-//**look into more REGEX for stuff like match **
-//**look more into enum ie for array list for string types */
+//**look into more REGEX need to make sure doing it right **
+//**look more into enum --- might want an enum for zones **/

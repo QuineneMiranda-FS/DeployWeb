@@ -1,0 +1,7 @@
+$kind: http-request
+url: http://localhost:3000/api/locations/69b8afae3365fca68f240cec
+method: GET
+body:
+  type: json
+  content: ""
+order: 4085723590563170

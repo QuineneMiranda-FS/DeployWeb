@@ -1,30 +1,21 @@
 const express = require("express");
 const router = express.Router();
-//divided routes
-const tzNameRoute = require("./timeZonesRoute");
-const tzCityRoute = require("./tzLocationRoute");
 
-//array storage
-
-const timeZones = [
-  { id: 1111, name: "Eastern", city: "New York" },
-  { id: 2222, name: "Central", city: "Chicago" },
-  { id: 3333, name: "Mountain", city: "Denver" },
-  { id: 4444, name: "Pacific", city: "Los Angeles" },
-];
+const timeZoneRoutes = require("./timeZonesRoute");
+const locationRoutes = require("./locationRoute");
 
 router.get("/", (req, res) => {
-  //general GET
+  //200 = ok
   res.status(200).json({
-    //200 is ok
     success: true,
-    data: timeZones,
-    message: `${req.method} - Request made to Timezones Route`,
-    metadata: { hostname: req.hostname, method: req.method }, //for me
+    message: "API root - Request successful",
+    metadata: { hostname: req.hostname, method: req.method },
   });
 });
 
-router.use("/timeZonesRoute", timeZonesRoute);
-router.use("/tzLocationRoute", tzLocationRoute);
+//Sub-Routers
+
+router.use("/timezones", timeZoneRoutes);
+router.use("/locations", locationRoutes);
 
 module.exports = router;

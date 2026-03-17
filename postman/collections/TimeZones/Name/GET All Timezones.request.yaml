@@ -1,0 +1,5 @@
+$kind: http-request
+name: GET All Timezones
+url: http://localhost:3000/api/timezones
+method: GET
+order: 1773708005986

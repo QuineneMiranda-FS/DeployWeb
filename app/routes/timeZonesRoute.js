@@ -4,11 +4,11 @@
 const router = require("express").Router();
 //controller below
 const {
-  createTimeZone,
+  createTimezone,
   getAllTimeZones,
   getTimeZoneById,
-  updateTimeZoneById,
-  deleteTimeZoneByID,
+  updateTimezoneById,
+  deleteTimezoneByID,
 } = require("../controllers/timeZonesController");
 
 //GET all Timezones
@@ -18,12 +18,12 @@ router.get("/", getAllTimeZones);
 router.get("/:id", getTimeZoneById);
 
 //PUT by ID
-router.put("/:id", updateTimeZoneById);
+router.put("/:id", updateTimezoneById);
 
 //POST
-router.post("/", createTimeZone);
+router.post("/", createTimezone);
 
 //DELETE by ID
-router.delete("/:id", deleteTimeZoneByID);
+router.delete("/:id", deleteTimezoneByID);
 
 module.exports = router;
