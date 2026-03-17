@@ -92,7 +92,7 @@ const updateLocationById = async (req, res, next) => {
     if (!updatedLocation) {
       return res
         .status(404)
-        .json({ success: false, message: "Record not found" });
+        .json({ success: false, message: `Location ID: ${id} not found.` });
     }
 
     res.status(200).json({ success: true, data: updatedLocation });
@@ -110,7 +110,7 @@ const deleteLocationByID = async (req, res, next) => {
     if (!deletedRecord) {
       return res
         .status(404)
-        .json({ success: false, message: "Record not found" });
+        .json({ success: false, message: `Location ID: ${id} not found.` });
     }
 
     res.status(200).json({

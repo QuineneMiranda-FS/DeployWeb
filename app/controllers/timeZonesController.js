@@ -1,18 +1,24 @@
 const timeZonesModel = require("../models/TimeZonesModel");
-
-const { timeZones: mockTimeZones } = require("../db/mockdata");
+const { timeZones, locations } = require("../db/mockdata");
 
 const getAllTimeZones = async (req, res, next) => {
   try {
-    const dbData = await timeZonesModel.find({});
+    // from Mongo
+    const mongoTimeZones = await timeZonesModel.find().populate("location");
 
-    const dataToSend = dbData.length > 0 ? dbData : mockTimeZones;
+    // mock data
+    const mockDataToSend = timeZones.map((tz) => ({
+      ...tz,
+      location: locations.find((loc) => loc.timeZoneId === tz.id) || null,
+    }));
 
-    //200 = ok
+    // both mongo and mock
+    const combinedData = [...mockDataToSend, ...mongoTimeZones];
+
     res.status(200).json({
       success: true,
-      data: dataToSend,
-      message: `${req.method} - request successful`,
+      count: combinedData.length,
+      data: combinedData,
       metadata: { hostname: req.hostname, method: req.method },
     });
   } catch (error) {
@@ -20,22 +26,31 @@ const getAllTimeZones = async (req, res, next) => {
   }
 };
 
-// GET TimeZone by ID
+// if mongo doesn't have
 const getTimeZoneById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const timeZone = await timeZonesModel.findById(id);
+    // check db
+    let timeZone = await timeZonesModel.findById(id).populate("location");
+
+    // check mock
+    if (!timeZone) {
+      const mockTz = timeZones.find((tz) => tz.id === id || tz._id === id);
+      if (mockTz) {
+        timeZone = {
+          ...mockTz,
+          location:
+            locations.find((loc) => loc.timeZoneId === mockTz.id) || null,
+        };
+      }
+    }
 
     if (!timeZone) {
       return res.status(404).json({ message: `Timezone ID: ${id} not found.` });
     }
 
-    res.status(200).json({
-      success: true,
-      data: timeZone,
-      metadata: { hostname: req.hostname, method: req.method },
-    });
+    res.status(200).json({ success: true, data: timeZone });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -44,7 +59,7 @@ const getTimeZoneById = async (req, res, next) => {
 // POST (Create)
 const createTimezone = async (req, res, next) => {
   try {
-    const { name, fullName, offset } = req.body;
+    const { name, fullName, offset, location } = req.body;
 
     if (!name || !fullName) {
       return res
@@ -52,18 +67,14 @@ const createTimezone = async (req, res, next) => {
         .json({ message: "Name and fullName are required" });
     }
 
-    // Change for Mongo Generates ID automatically
-    //just having it automate an ID
-    // const newTimeZone = {
-    //   id: Math.floor(1000 + Math.random() * 9000),
-    //   name: name,
-    //   city: city,
-    // };
     const newRecord = await timeZonesModel.create({
       name,
       fullName,
       offset,
+      location,
     });
+
+    await newRecord.populate("location");
 
     res.status(201).json({
       success: true,
@@ -80,15 +91,17 @@ const updateTimezoneById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const updatedTZ = await timeZonesModel.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedTZ = await timeZonesModel
+      .findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true, //double check this
+      })
+      .populate("location");
 
     if (!updatedTZ) {
       return res
         .status(404)
-        .json({ success: false, message: "Record not found" });
+        .json({ success: false, message: `Timezone ID: ${id} not found.` });
     }
 
     res.status(200).json({
@@ -109,7 +122,7 @@ const deleteTimezoneByID = async (req, res, next) => {
     if (!deletedRecord) {
       return res
         .status(404)
-        .json({ success: false, message: "Record not found" });
+        .json({ success: false, message: `Timezone ID: ${id} not found.` });
     }
 
     res.status(200).json({

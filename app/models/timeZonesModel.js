@@ -16,7 +16,7 @@ const timeZoneSchema = new mongoose.Schema(
     fullName: {
       type: String,
       required: [true, "Full name is required"],
-      unique: true,
+      // unique: true,
       trim: true,
       minLength: [3, "Name needs to be at least 3 characters"],
       maxLength: [38, "Name CANNOT be more than 38 characters"], //longest named city is 168 characters but std db sets 38 max
@@ -30,8 +30,13 @@ const timeZoneSchema = new mongoose.Schema(
     //**FIX/CHECK not sure on this cuz hello regex... ugh
     offset: {
       type: String,
-      // required: true,
       match: [/^[+-]\d{2}:\d{2}$/, "Offset must be in +/-HH:MM format"],
+    },
+
+    // from Location model
+    location: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Location",
     },
   },
   { timestamps: true },
