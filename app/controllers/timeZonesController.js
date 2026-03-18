@@ -5,7 +5,18 @@ const getAllTimeZones = async (req, res, next) => {
   try {
     // from Mongo
     const mongoTimeZones = await timeZonesModel.find().populate("location");
+    //in parens of find() abv add queries
+    //example: await timeZonesModel.find({ name: "EST" })
+    //?? do i need to add in the force capitalize
+    // console.log(">>>", req.query);
 
+    let queryString = JSON.stringify(req.query);
+    //greater than or equal to example
+    // queryString = queryString.replace(/\b/(gt|gte|lt|lte)\b/g,match => `$${match}`);
+
+    //use select sort for this kind of data
+
+    console.log(JSON.parse(queryString));
     // mock data
     const mockDataToSend = timeZones.map((tz) => ({
       ...tz,
