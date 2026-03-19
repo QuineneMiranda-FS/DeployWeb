@@ -8,7 +8,7 @@ const LocationSchema = new mongoose.Schema(
       trim: true,
       minLength: [3, "City name must be at least 3 characters"],
       maxLength: [50, "City name cannot exceed 50 characters"],
-      //bleh FIX/CHECK regex
+
       match: [/^[a-zA-Z\s\-']+$/, "Please provide a valid city name"],
     },
     fullCityName: {

@@ -1,10 +1,12 @@
 require("dotenv").config();
 // const http = require("http"); //switched with express app
 // const dotenv = ///don't nd
-const app = require("./app/");
-//database
+
+//db
 const connectDB = require("./app/db/config");
 connectDB();
+
+const app = require("./app/");
 
 const PORT = process.env.PORT || 3000;
 
