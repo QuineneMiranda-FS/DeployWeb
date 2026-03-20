@@ -21,13 +21,7 @@ const timeZoneSchema = new mongoose.Schema(
       minLength: [3, "Name needs to be at least 3 characters"],
       maxLength: [38, "Name CANNOT be more than 38 characters"], //longest named city is 168 characters but std db sets 38 max
     },
-    // **Debating... want to actually pull the time from library dynamically**
-    // time: {
-    //   type: String,
-    //   // required: [true, "Local time is required"],
-    //   match: [/^\d{2}:\d{2}$/, "Time must be in HH:MM format"],
-    // },
-    //**FIX/CHECK not sure on this cuz hello regex... ugh
+
     offset: {
       type: String,
       match: [/^[+-]\d{2}:\d{2}$/, "Offset must be in +/-HH:MM format"],

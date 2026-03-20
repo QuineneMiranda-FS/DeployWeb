@@ -141,7 +141,7 @@ const getGeoDataById = async (req, res) => {
   }
 };
 
-// GET fm stored data [ /api/geoData/stored ]
+// GET ALL fm stored data [ /api/geoData/stored ]
 const getStoredGeoData = async (req, res) => {
   try {
     const { city, countryCode, start, end } = req.query;

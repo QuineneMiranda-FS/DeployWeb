@@ -1,20 +1,64 @@
 const LocationModel = require("../models/LocationModel");
 
 // GET All Locations
+// [ ?countryCode=US&sort=cityName&page=1&limit=10 ]
 const getAllLocations = async (req, res, next) => {
   try {
-    const dbLocations = await LocationModel.find({}).populate("timeZoneId");
+    // field exclude fix
+    let queryObj = { ...req.query };
+    const excludedFields = ["sort", "page", "limit", "fields"];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    // filter
+    let queryStr = JSON.stringify(queryObj);
+    //replace
+    queryStr = queryStr.replace(
+      /\b(gt|gte|lt|lte|in)\b/g,
+      (match) => `$${match}`,
+    );
+
+    // query
+    let query = LocationModel.find(JSON.parse(queryStr)).populate("timeZoneId");
+
+    // sort
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    }
+
+    // paginate
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+
+    const dbLocations = await query;
 
     res.status(200).json({
       success: true,
       count: dbLocations.length,
       data: dbLocations,
-      metadata: { hostname: req.hostname, method: req.method },
     });
   } catch (error) {
     next(error);
   }
 };
+
+//working code before query
+// const getAllLocations = async (req, res, next) => {
+//   try {
+//     const dbLocations = await LocationModel.find({}).populate("timeZoneId");
+
+//     res.status(200).json({
+//       success: true,
+//       count: dbLocations.length,
+//       data: dbLocations,
+//       metadata: { hostname: req.hostname, method: req.method },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 // GET Location by ID
 const getLocationById = async (req, res, next) => {

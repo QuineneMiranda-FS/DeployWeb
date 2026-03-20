@@ -16,7 +16,7 @@ const geoSchema = new mongoose.Schema(
       abbreviation_DST: String,
       offset_STD: String,
       offset_DST: String,
-    }, // Removed extra nested 'timezone' property and extra closing brace here
+    },
   },
   {
     timestamps: { createdAt: "createdAt", updatedAt: "lastUpdated" },
