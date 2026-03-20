@@ -1,7 +1,5 @@
 const LocationModel = require("../models/LocationModel");
 
-const LocationModel = require("../models/LocationModel");
-
 // GET All Locations
 const getAllLocations = async (req, res, next) => {
   try {
