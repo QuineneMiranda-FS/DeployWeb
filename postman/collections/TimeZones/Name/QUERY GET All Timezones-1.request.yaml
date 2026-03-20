@@ -1,11 +1,11 @@
 $kind: http-request
-name: Query GET All Timezones
+name: QUERY GET All Timezones
 url: |
-  http://localhost:3000/api/timezones?name=UTC&createdAt[gt]=2024-01-01&select=name,fullName,offset&sort=-name&page=1&limit=5
+  http://localhost:3000/api/timezones?name=UTC&createdAt[gt]=2026-03-19&select=name,fullName,offset&sort=-name&page=1&limit=5
 method: GET
 queryParams:
   name: UTC
-  createdAt[gt]: 2024-01-01
+  createdAt[gt]: 2026-03-19
   select: name,fullName,offset
   sort: -name
   page: "1"
@@ -20,4 +20,4 @@ scripts:
           pm.response.to.have.status(200);
       });
     language: text/javascript
-order: 440557904306144
+order: 229291728498872

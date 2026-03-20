@@ -2,13 +2,12 @@ const timeZonesModel = require("../models/TimeZonesModel");
 
 const getAllTimeZones = async (req, res, next) => {
   try {
-    // filtering
+    // filter
     const queryObj = { ...req.query };
     const excludedFields = ["select", "sort", "page", "limit"];
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    // filter range (gt, gte, lt, lte, in)
-    // Note: ?createdAt[gt]=2023-01-01 converted to { createdAt: { $gt: '2023-01-01' } }
+    // operators
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(
       /\b(gt|gte|lt|lte|in)\b/g,
@@ -17,7 +16,7 @@ const getAllTimeZones = async (req, res, next) => {
 
     let finalQuery = JSON.parse(queryStr);
 
-    // partial matches
+    // partial matching/ case sensitivity
     if (req.query.name) {
       finalQuery.name = { $regex: req.query.name, $options: "i" };
     }
@@ -28,20 +27,22 @@ const getAllTimeZones = async (req, res, next) => {
     // query
     let query = timeZonesModel.find(finalQuery);
 
-    // field fix
+    // fields
     if (req.query.select) {
-      //multiples
+      //multiple
       const fields = req.query.select.split(",").join(" ");
       query = query.select(fields);
     }
 
-    // sort
-    const sortBy = req.query.sort || "name";
+    // sort - defaults to name
+    const sortBy = req.query.sort
+      ? req.query.sort.split(",").join(" ")
+      : "name";
     query = query.sort(sortBy);
 
     // paginate
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 3; //set low since only 8 in db right now
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
 
@@ -52,6 +53,10 @@ const getAllTimeZones = async (req, res, next) => {
       count: timeZones.length,
       page,
       data: timeZones,
+      metadata: {
+        hostname: req.hostname,
+        method: req.method,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

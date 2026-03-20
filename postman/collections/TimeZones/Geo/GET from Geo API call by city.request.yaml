@@ -1,7 +1,7 @@
 $kind: http-request
 name: GET from Geo API call by city
-url: http://localhost:3000/api/geoData?city=orlando
+url: http://localhost:3000/api/geoData?city=seattle
 method: GET
 queryParams:
-  city: orlando
+  city: seattle
 order: 1773971655803

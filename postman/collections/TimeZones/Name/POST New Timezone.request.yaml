@@ -4,7 +4,7 @@ url: http://localhost:3000/api/timezones
 method: POST
 body:
   type: json
-  content: '{"name":"GMT","fullName":"London"}'
+  content: '{"name":"EAT","fullName":"East Africa Time"}'
 scripts:
   - type: afterResponse
     code: |

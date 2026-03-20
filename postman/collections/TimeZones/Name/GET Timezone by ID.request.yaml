@@ -1,6 +1,6 @@
 $kind: http-request
 name: GET Timezone by ID
-url: http://localhost:3000/api/timezones/69b8a9682ee74e2a0daf2a6f
+url: http://localhost:3000/api/timezones/69bdc0d81f5daa74187494ed
 method: GET
 scripts:
   - type: afterResponse

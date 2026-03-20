@@ -8,96 +8,208 @@ const GeoData = require("../models/GeoDataModel");
 //specify lat long ie. ?lat=51.5074&lon=-0.1278
 const getGeoDataAPI = async (req, res) => {
   try {
-    const { city, lat, lon, country } = req.query;
-    let dbQuery = {};
-    let apiUrl = "";
+    const { city, lat, lon, country, page, limit, sort, select } = req.query;
 
-    // by lat long
-    if (lat && lon) {
-      const longitude = parseFloat(lon);
-      const latitude = parseFloat(lat);
+    // API if lat/lon or city provided
+    if ((lat && lon) || city) {
+      let dbSearchQuery = {};
+      let apiUrl = "";
 
-      if (
-        isNaN(latitude) ||
-        latitude < -90 ||
-        latitude > 90 ||
-        isNaN(longitude) ||
-        longitude < -180 ||
-        longitude > 180
-      ) {
-        return res.status(400).json({
-          error: "Invalid coordinates. Lat: -90 to 90, Lon: -180 to 180.",
-        });
+      if (lat && lon) {
+        const longitude = parseFloat(lon);
+        const latitude = parseFloat(lat);
+
+        if (
+          isNaN(latitude) ||
+          latitude < -90 ||
+          latitude > 90 ||
+          isNaN(longitude) ||
+          longitude < -180 ||
+          longitude > 180
+        ) {
+          return res.status(400).json({ error: "Invalid coordinates." });
+        }
+
+        dbSearchQuery = {
+          location: {
+            $near: {
+              $geometry: { type: "Point", coordinates: [longitude, latitude] },
+              $maxDistance: 1000,
+            },
+          },
+        };
+        apiUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
+      } else if (city) {
+        dbSearchQuery = { city: new RegExp(`^${city}$`, "i") };
+        if (country) dbSearchQuery.countryCode = country.toLowerCase();
+
+        apiUrl = `https://api.geoapify.com/v1/geocode/search?text=${city}&lang=en&limit=10&type=city&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
+        if (country) apiUrl += `&filter=countrycode:${country.toLowerCase()}`;
       }
 
-      dbQuery = {
-        location: {
-          $near: {
-            $geometry: { type: "Point", coordinates: [longitude, latitude] },
-            $maxDistance: 1000, //in km
-          },
+      // chk db
+      const existingData = await GeoData.findOne(dbSearchQuery);
+      if (existingData)
+        return res.json({ source: "database", data: existingData });
+
+      // fetch
+      const response = await axios.get(apiUrl);
+      const result = response.data.results?.[0];
+
+      if (!result)
+        return res
+          .status(404)
+          .json({ error: "Location not found via Geoapify" });
+
+      const savedRecord = await GeoData.create({
+        city: (result.city || city || "Unknown").toLowerCase(),
+        countryCode: result.country_code,
+        postcode: result.postcode,
+        location: { type: "Point", coordinates: [result.lon, result.lat] },
+        timezone: {
+          name: result.timezone?.name,
+          name_alt: result.timezone?.name_alt,
+          abbreviation_STD: result.timezone?.abbreviation_STD,
+          abbreviation_DST: result.timezone?.abbreviation_DST,
+          offset_STD: result.timezone?.offset_STD,
+          offset_DST: result.timezone?.offset_DST,
         },
-      };
+      });
 
-      apiUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
+      return res.json({ source: "api", data: savedRecord });
     }
 
-    // by city
-    else if (city) {
-      dbQuery = { city: new RegExp(`^${city}$`, "i") };
-      if (country) dbQuery.countryCode = country.toLowerCase();
+    // filter
+    let queryObj = { ...req.query };
+    const excludedFields = ["page", "sort", "limit", "select"];
+    excludedFields.forEach((el) => delete queryObj[el]);
 
-      apiUrl = `https://api.geoapify.com/v1/geocode/search?text=${city}&lang=en&limit=10&type=city&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
-
-      if (country) apiUrl += `&filter=countrycode:${country.toLowerCase()}`;
-    } else {
-      return res
-        .status(400)
-        .json({ error: "Provide 'city' or 'lat'/'lon' parameters." });
-    }
-
-    // chk db
-    const existingData = await GeoData.findOne(dbQuery);
-    if (existingData)
-      return res.json({ source: "database", data: existingData });
-
-    // fetch
-    const response = await axios.get(apiUrl);
-    console.log("Geoapify Response:", response.data); //troubleshooting
-    const result = response.data.results?.[0];
-
-    if (!result)
-      return res.status(404).json({ error: "Location not found via Geoapify" });
-
-    // sv
-    const newGeoRecord = new GeoData({
-      city: (result.city || city || "Unknown").toLowerCase(),
-      countryCode: result.country_code,
-      postcode: result.postcode,
-      location: {
-        type: "Point",
-        coordinates: [result.lon, result.lat],
-      },
-      timezone: {
-        name: result.timezone?.name,
-        name_alt: result.timezone?.name_alt,
-        abbreviation_STD: result.timezone?.abbreviation_STD,
-        abbreviation_DST: result.timezone?.abbreviation_DST,
-        offset_STD: result.timezone?.offset_STD,
-        offset_DST: result.timezone?.offset_DST,
-      },
+    // handle partial matches
+    const searchableFields = ["city", "postcode"];
+    searchableFields.forEach((field) => {
+      if (queryObj[field] && typeof queryObj[field] === "string") {
+        queryObj[field] = { $regex: `^${queryObj[field]}`, $options: "i" };
+      }
     });
 
-    const savedRecord = await newGeoRecord.save();
-    res.json({ source: "api", data: savedRecord });
+    // operators
+    let queryStr = JSON.stringify(queryObj).replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      (match) => `$${match}`,
+    );
+    let dbQuery = GeoData.find(JSON.parse(queryStr));
+
+    // select sort
+    if (select) dbQuery = dbQuery.select(select.split(",").join(" "));
+    dbQuery = sort
+      ? dbQuery.sort(sort.split(",").join(" "))
+      : dbQuery.sort("-lastUpdated");
+
+    // paginate
+    const p = parseInt(page) || 1;
+    const l = parseInt(limit) || 10;
+    dbQuery = dbQuery.skip((p - 1) * l).limit(l);
+
+    const data = await dbQuery;
+    res.json({ results: data.length, page: p, data });
   } catch (err) {
-    console.error("API/DB Error:", err.response?.data || err.message);
-    res.status(500).json({
-      error: "Operation failed",
-      details: err.response?.data?.message || err.message,
-    });
+    res.status(500).json({ error: "Operation failed", details: err.message });
   }
 };
+
+//working code before more query
+// const getGeoDataAPI = async (req, res) => {
+//   try {
+//     const { city, lat, lon, country } = req.query;
+//     let dbQuery = {};
+//     let apiUrl = "";
+
+//     // by lat long
+//     if (lat && lon) {
+//       const longitude = parseFloat(lon);
+//       const latitude = parseFloat(lat);
+
+//       if (
+//         isNaN(latitude) ||
+//         latitude < -90 ||
+//         latitude > 90 ||
+//         isNaN(longitude) ||
+//         longitude < -180 ||
+//         longitude > 180
+//       ) {
+//         return res.status(400).json({
+//           error: "Invalid coordinates. Lat: -90 to 90, Lon: -180 to 180.",
+//         });
+//       }
+
+//       dbQuery = {
+//         location: {
+//           $near: {
+//             $geometry: { type: "Point", coordinates: [longitude, latitude] },
+//             $maxDistance: 1000, //in km
+//           },
+//         },
+//       };
+
+//       apiUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
+//     }
+
+//     // by city
+//     else if (city) {
+//       dbQuery = { city: new RegExp(`^${city}$`, "i") };
+//       if (country) dbQuery.countryCode = country.toLowerCase();
+
+//       apiUrl = `https://api.geoapify.com/v1/geocode/search?text=${city}&lang=en&limit=10&type=city&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
+
+//       if (country) apiUrl += `&filter=countrycode:${country.toLowerCase()}`;
+//     } else {
+//       return res
+//         .status(400)
+//         .json({ error: "Provide 'city' or 'lat'/'lon' parameters." });
+//     }
+
+//     // chk db
+//     const existingData = await GeoData.findOne(dbQuery);
+//     if (existingData)
+//       return res.json({ source: "database", data: existingData });
+
+//     // fetch
+//     const response = await axios.get(apiUrl);
+//     console.log("Geoapify Response:", response.data); //troubleshooting
+//     const result = response.data.results?.[0];
+
+//     if (!result)
+//       return res.status(404).json({ error: "Location not found via Geoapify" });
+
+//     // sv
+//     const newGeoRecord = new GeoData({
+//       city: (result.city || city || "Unknown").toLowerCase(),
+//       countryCode: result.country_code,
+//       postcode: result.postcode,
+//       location: {
+//         type: "Point",
+//         coordinates: [result.lon, result.lat],
+//       },
+//       timezone: {
+//         name: result.timezone?.name,
+//         name_alt: result.timezone?.name_alt,
+//         abbreviation_STD: result.timezone?.abbreviation_STD,
+//         abbreviation_DST: result.timezone?.abbreviation_DST,
+//         offset_STD: result.timezone?.offset_STD,
+//         offset_DST: result.timezone?.offset_DST,
+//       },
+//     });
+
+//     const savedRecord = await newGeoRecord.save();
+//     res.json({ source: "api", data: savedRecord });
+//   } catch (err) {
+//     console.error("API/DB Error:", err.response?.data || err.message);
+//     res.status(500).json({
+//       error: "Operation failed",
+//       details: err.response?.data?.message || err.message,
+//     });
+//   }
+// };
 
 // POST (CREATE) & sv to db [ /api/geoData ] *** make sure raw json
 //body should look like this: {

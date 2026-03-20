@@ -4,14 +4,13 @@ const LocationModel = require("../models/LocationModel");
 // [ ?countryCode=US&sort=cityName&page=1&limit=10 ]
 const getAllLocations = async (req, res, next) => {
   try {
-    // field exclude fix
+    // field exclude
     let queryObj = { ...req.query };
     const excludedFields = ["sort", "page", "limit", "fields"];
     excludedFields.forEach((el) => delete queryObj[el]);
 
     // filter
     let queryStr = JSON.stringify(queryObj);
-    //replace
     queryStr = queryStr.replace(
       /\b(gt|gte|lt|lte|in)\b/g,
       (match) => `$${match}`,
@@ -24,20 +23,28 @@ const getAllLocations = async (req, res, next) => {
     if (req.query.sort) {
       const sortBy = req.query.sort.split(",").join(" ");
       query = query.sort(sortBy);
+    } else {
+      query = query.sort("-createdAt"); // default
     }
 
-    // paginate
+    // paginate ..only 4 in db right now so query like 2 at a time
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 2;
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
 
     const dbLocations = await query;
+    const total = await LocationModel.countDocuments(JSON.parse(queryStr));
 
     res.status(200).json({
       success: true,
       count: dbLocations.length,
       data: dbLocations,
+      metadata: {
+        totalItems: total,
+        page: page,
+        limit: limit,
+      },
     });
   } catch (error) {
     next(error);
