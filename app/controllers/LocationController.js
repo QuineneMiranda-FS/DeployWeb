@@ -1,19 +1,12 @@
 const LocationModel = require("../models/LocationModel");
-const { timeZones, locations } = require("../db/mockdata");
+
+const LocationModel = require("../models/LocationModel");
 
 // GET All Locations
 const getAllLocations = async (req, res, next) => {
   try {
-    // try real db
-    let dbLocations = await LocationModel.find({}).populate("timeZoneId");
+    const dbLocations = await LocationModel.find({}).populate("timeZoneId");
 
-    // use mockdata
-    if (dbLocations.length === 0) {
-      dbLocations = locations.map((loc) => ({
-        ...loc,
-        timeZoneId: timeZones.find((tz) => tz.id === loc.timeZoneId) || null,
-      }));
-    }
     res.status(200).json({
       success: true,
       count: dbLocations.length,
@@ -40,7 +33,6 @@ const getLocationById = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: location,
-      metadata: { hostname: req.hostname, method: req.method },
     });
   } catch (error) {
     next(error);
@@ -67,6 +59,9 @@ const createLocation = async (req, res, next) => {
       region,
     });
 
+    // tz info
+    await newRecord.populate("timeZoneId");
+
     res.status(201).json({
       success: true,
       data: newRecord,
@@ -76,7 +71,6 @@ const createLocation = async (req, res, next) => {
     next(error);
   }
 };
-
 // PUT (Update) by ID
 const updateLocationById = async (req, res, next) => {
   try {

@@ -1,62 +1,32 @@
 const timeZonesModel = require("../models/TimeZonesModel");
-const { timeZones, locations } = require("../db/mockdata");
 
 const getAllTimeZones = async (req, res, next) => {
   try {
-    // from Mongo
-    const mongoTimeZones = await timeZonesModel.find().populate("location");
-    //in parens of find() abv add queries
-    //example: await timeZonesModel.find({ name: "EST" })
-    //?? do i need to add in the force capitalize
-    // console.log(">>>", req.query);
-
-    // let queryString = JSON.stringify(req.query);
-
-    // //use select sort for this kind of data
-
-    // console.log(JSON.parse(queryString));
-    // mock data
-    const mockDataToSend = timeZones.map((tz) => ({
-      ...tz,
-      location: locations.find((loc) => loc.timeZoneId === tz.id) || null,
-    }));
-
-    // both mongo and mock
-    const combinedData = [...mockDataToSend, ...mongoTimeZones];
+    const timeZones = await timeZonesModel.find().populate("location");
 
     res.status(200).json({
       success: true,
-      count: combinedData.length,
-      data: combinedData,
-      metadata: { hostname: req.hostname, method: req.method },
+      count: timeZones.length,
+      data: timeZones,
+      metadata: {
+        hostname: req.hostname,
+        method: req.method,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// if mongo doesn't have
 const getTimeZoneById = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    // check db
-    let timeZone = await timeZonesModel.findById(id).populate("location");
-
-    // check mock
-    if (!timeZone) {
-      const mockTz = timeZones.find((tz) => tz.id === id || tz._id === id);
-      if (mockTz) {
-        timeZone = {
-          ...mockTz,
-          location:
-            locations.find((loc) => loc.timeZoneId === mockTz.id) || null,
-        };
-      }
-    }
+    const timeZone = await timeZonesModel.findById(id).populate("location");
 
     if (!timeZone) {
-      return res.status(404).json({ message: `Timezone ID: ${id} not found.` });
+      const error = new Error(`Timezone ID: ${id} not found.`);
+      error.status = 404;
+      return next(error);
     }
 
     res.status(200).json({ success: true, data: timeZone });
@@ -64,7 +34,6 @@ const getTimeZoneById = async (req, res, next) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
 // POST (Create)
 const createTimezone = async (req, res, next) => {
   try {
