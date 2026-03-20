@@ -20,7 +20,7 @@ const geoSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: { updatedAt: "lastUpdated" },
+    timestamps: { createdAt: "createdAt", updatedAt: "lastUpdated" },
   },
 );
 
