@@ -11,7 +11,6 @@ const getAllLocations = async (req, res, next) => {
     if (dbLocations.length === 0) {
       dbLocations = locations.map((loc) => ({
         ...loc,
-        // **check if did right...should find tz that matches location
         timeZoneId: timeZones.find((tz) => tz.id === loc.timeZoneId) || null,
       }));
     }

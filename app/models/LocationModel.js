@@ -8,18 +8,23 @@ const LocationSchema = new mongoose.Schema(
       trim: true,
       minLength: [3, "City name must be at least 3 characters"],
       maxLength: [50, "City name cannot exceed 50 characters"],
-
       match: [/^[a-zA-Z\s\-']+$/, "Please provide a valid city name"],
     },
     fullCityName: {
       type: String,
     },
+    countryCode: {
+      type: String,
+      required: [true, "Country code is required"],
+      uppercase: true,
+      trim: true,
+      minLength: [2, "Country code must be 2 characters"],
+      maxLength: [2, "Country code must be 2 characters"],
+      match: [/^[A-Z]{2}$/, "Please provide a valid 2-letter ISO country code"],
+    },
     timeZoneId: {
-      // type: String,
       type: mongoose.Schema.Types.ObjectId,
       ref: "TimeZonesModel",
-      // exactly,
-      // required: true,
     },
     postcode: {
       type: String,
