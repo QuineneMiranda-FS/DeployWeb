@@ -82,6 +82,7 @@ const getAllTimeZones = async (req, res, next) => {
 //   }
 // };
 
+//---------------------------------------------------------------------
 const getTimeZoneById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -98,6 +99,7 @@ const getTimeZoneById = async (req, res, next) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+//---------------------------------------------------------------------
 // POST (Create)
 const createTimezone = async (req, res, next) => {
   try {
@@ -128,6 +130,7 @@ const createTimezone = async (req, res, next) => {
   }
 };
 
+//---------------------------------------------------------------------
 // PUT by ID
 const updateTimezoneById = async (req, res, next) => {
   try {
@@ -155,6 +158,7 @@ const updateTimezoneById = async (req, res, next) => {
   }
 };
 
+//---------------------------------------------------------------------
 // DELETE by ID
 const deleteTimezoneByID = async (req, res, next) => {
   try {

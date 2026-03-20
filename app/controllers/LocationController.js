@@ -67,6 +67,7 @@ const getAllLocations = async (req, res, next) => {
 //   }
 // };
 
+//---------------------------------------------------------------------
 // GET Location by ID
 const getLocationById = async (req, res, next) => {
   try {
@@ -88,6 +89,7 @@ const getLocationById = async (req, res, next) => {
   }
 };
 
+//---------------------------------------------------------------------
 // POST (Create)
 const createLocation = async (req, res, next) => {
   try {
@@ -120,6 +122,7 @@ const createLocation = async (req, res, next) => {
     next(error);
   }
 };
+//---------------------------------------------------------------------
 // PUT (Update) by ID
 const updateLocationById = async (req, res, next) => {
   try {
@@ -143,6 +146,7 @@ const updateLocationById = async (req, res, next) => {
   }
 };
 
+//---------------------------------------------------------------------
 // DELETE by ID
 const deleteLocationByID = async (req, res, next) => {
   try {
