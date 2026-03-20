@@ -117,7 +117,7 @@ const getGeoDataAPI = async (req, res) => {
   }
 };
 
-//working code before more query
+//working code before queries added
 // const getGeoDataAPI = async (req, res) => {
 //   try {
 //     const { city, lat, lon, country } = req.query;
