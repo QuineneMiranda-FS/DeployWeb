@@ -10,11 +10,11 @@ const getAllTimeZones = async (req, res, next) => {
     //?? do i need to add in the force capitalize
     // console.log(">>>", req.query);
 
-    let queryString = JSON.stringify(req.query);
+    // let queryString = JSON.stringify(req.query);
 
-    //use select sort for this kind of data
+    // //use select sort for this kind of data
 
-    console.log(JSON.parse(queryString));
+    // console.log(JSON.parse(queryString));
     // mock data
     const mockDataToSend = timeZones.map((tz) => ({
       ...tz,

@@ -100,6 +100,15 @@ const getGeoDataAPI = async (req, res) => {
 };
 
 // POST (CREATE) & sv to db [ /api/geoData ] *** make sure raw json
+//body should look like this: {
+//   "city": "moscow",
+//   "countryCode": "ru",
+//   "postcode": "101000",
+//   "location": {
+//     "type": "Point",
+//     "coordinates": [37.6173, 55.7558]
+//   }
+// }
 const createGeoData = async (req, res) => {
   try {
     const newEntry = new GeoData(req.body);
@@ -115,7 +124,8 @@ const createGeoData = async (req, res) => {
   }
 };
 
-// GET by id [ /api/geoData/ ] *you only need to type/paste id
+// GET by id [ /api/geoData/ ] *you only need to type/paste id numbers
+//looks like this: http://localhost:3000/api/geoData/69bcb72106932c5dcd6c1bf3
 const getGeoDataById = async (req, res) => {
   try {
     // validate db
