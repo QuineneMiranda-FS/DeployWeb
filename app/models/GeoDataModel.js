@@ -10,14 +10,13 @@ const geoSchema = new mongoose.Schema(
       coordinates: { type: [Number], required: true }, // lat and long
     },
     timezone: {
-      timezone: {
-    name: String,             
-    name_alt: String,         
-    abbreviation_STD: String, // "EST"
-    abbreviation_DST: String, // "EDT"
-    offset_STD: String,       // "-05:00"
-    offset_DST: String        // "-04:00"
-    },
+      name: String,
+      name_alt: String,
+      abbreviation_STD: String,
+      abbreviation_DST: String,
+      offset_STD: String,
+      offset_DST: String,
+    }, // Removed extra nested 'timezone' property and extra closing brace here
   },
   {
     timestamps: { createdAt: "createdAt", updatedAt: "lastUpdated" },
