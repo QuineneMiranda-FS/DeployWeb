@@ -1,0 +1,8 @@
+$kind: http-request
+name: GET from Geo API call by city and country
+url: http://localhost:3000/api/geoData?city=london&country=gb
+method: GET
+queryParams:
+  city: london
+  country: gb
+order: 1549358751373565

@@ -2,14 +2,17 @@ const axios = require("axios");
 const mongoose = require("mongoose"); // Added for validation /error handling
 const GeoData = require("../models/GeoDataModel");
 
-// GET from API [ /api/geo-data ]
+// GET from API [ /api/geo-data? ]
+//specify city ie. ?city=london
+//specify city with country ie. ?city=london&country=gb
+//specify lat long ie. ?lat=51.5074&lon=-0.1278
 const getGeoDataAPI = async (req, res) => {
   try {
     const { city, lat, lon, country } = req.query;
     let dbQuery = {};
     let apiUrl = "";
+
     // by lat long
-    //validate
     if (lat && lon) {
       const longitude = parseFloat(lon);
       const latitude = parseFloat(lat);
@@ -22,30 +25,30 @@ const getGeoDataAPI = async (req, res) => {
         longitude < -180 ||
         longitude > 180
       ) {
-        return res
-          .status(400)
-          .json({
-            error: "Invalid coordinates. Lat: -90 to 90, Lon: -180 to 180.",
-          });
+        return res.status(400).json({
+          error: "Invalid coordinates. Lat: -90 to 90, Lon: -180 to 180.",
+        });
       }
 
       dbQuery = {
         location: {
           $near: {
             $geometry: { type: "Point", coordinates: [longitude, latitude] },
-            $maxDistance: 10,
+            $maxDistance: 1000, //in km
           },
         },
       };
 
-      apiUrl = `https://api.geoapify.com{lat}&lon=${lon}&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
+      apiUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
     }
-    //by city
+
+    // by city
     else if (city) {
       dbQuery = { city: new RegExp(`^${city}$`, "i") };
       if (country) dbQuery.countryCode = country.toLowerCase();
 
-      apiUrl = `https://api.geoapify.com{encodeURIComponent(city)}&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
+      apiUrl = `https://api.geoapify.com/v1/geocode/search?text=${city}&lang=en&limit=10&type=city&format=json&apiKey=${process.env.GEOAPIFY_API_KEY}`;
+
       if (country) apiUrl += `&filter=countrycode:${country.toLowerCase()}`;
     } else {
       return res
@@ -53,39 +56,50 @@ const getGeoDataAPI = async (req, res) => {
         .json({ error: "Provide 'city' or 'lat'/'lon' parameters." });
     }
 
+    // chk db
     const existingData = await GeoData.findOne(dbQuery);
     if (existingData)
       return res.json({ source: "database", data: existingData });
 
+    // fetch
     const response = await axios.get(apiUrl);
+    console.log("Geoapify Response:", response.data); //troubleshooting
     const result = response.data.results?.[0];
-    if (!result) return res.status(404).json({ error: "Location not found" });
 
+    if (!result)
+      return res.status(404).json({ error: "Location not found via Geoapify" });
+
+    // sv
     const newGeoRecord = new GeoData({
       city: (result.city || city || "Unknown").toLowerCase(),
       countryCode: result.country_code,
       postcode: result.postcode,
-      location: { type: "Point", coordinates: [result.lon, result.lat] },
+      location: {
+        type: "Point",
+        coordinates: [result.lon, result.lat],
+      },
       timezone: {
-        timezone: {
-          name: result.timezone?.name,
-          name_alt: result.timezone?.name_alt,
-          abbreviation_STD: result.timezone?.abbreviation_STD,
-          abbreviation_DST: result.timezone?.abbreviation_DST,
-          offset_STD: result.timezone?.offset_STD,
-          offset_DST: result.timezone?.offset_DST,
-        },
+        name: result.timezone?.name,
+        name_alt: result.timezone?.name_alt,
+        abbreviation_STD: result.timezone?.abbreviation_STD,
+        abbreviation_DST: result.timezone?.abbreviation_DST,
+        offset_STD: result.timezone?.offset_STD,
+        offset_DST: result.timezone?.offset_DST,
       },
     });
 
     const savedRecord = await newGeoRecord.save();
     res.json({ source: "api", data: savedRecord });
   } catch (err) {
-    res.status(500).json({ error: "Operation failed", details: err.message });
+    console.error("API/DB Error:", err.response?.data || err.message);
+    res.status(500).json({
+      error: "Operation failed",
+      details: err.response?.data?.message || err.message,
+    });
   }
 };
 
-// POST (CREATE) & sv to db [ /api/geo-data ]
+// POST (CREATE) & sv to db [ /api/geoData ] *** make sure raw json
 const createGeoData = async (req, res) => {
   try {
     const newEntry = new GeoData(req.body);
@@ -101,7 +115,7 @@ const createGeoData = async (req, res) => {
   }
 };
 
-// GET by id [ /api/geo-data/:id ]
+// GET by id [ /api/geoData/ ] *you only need to type/paste id
 const getGeoDataById = async (req, res) => {
   try {
     // validate db
@@ -117,7 +131,7 @@ const getGeoDataById = async (req, res) => {
   }
 };
 
-// GET fm stored data [ /api/geo-data/stored ]
+// GET fm stored data [ /api/geoData/stored ]
 const getStoredGeoData = async (req, res) => {
   try {
     const { city, countryCode, start, end } = req.query;
@@ -139,6 +153,9 @@ const getStoredGeoData = async (req, res) => {
         const endDate = new Date(end);
         if (isNaN(endDate.getTime()))
           return res.status(400).json({ error: "Invalid end date" });
+
+        // has to be end of day (23:59:59)
+        endDate.setUTCHours(23, 59, 59, 999);
         filter.createdAt.$lte = endDate;
       }
     }
