@@ -35,8 +35,9 @@ const timeZoneSchema = new mongoose.Schema(
 
     // from Location model
     location: {
+      // type: String, //use this for seeds
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Location",
+      ref: "LocationModel",
     },
   },
   { timestamps: true },

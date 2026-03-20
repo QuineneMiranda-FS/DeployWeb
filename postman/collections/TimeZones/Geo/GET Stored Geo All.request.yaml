@@ -1,5 +1,5 @@
 $kind: http-request
 name: GET Stored Geo All
-url: http://localhost:3000/api/geoData/69bcb72106932c5dcd6c1bf3
+url: http://localhost:3000/api/geoData/stored
 method: GET
 order: 812668521710185

@@ -23,6 +23,7 @@ const LocationSchema = new mongoose.Schema(
       match: [/^[A-Z]{2}$/, "Please provide a valid 2-letter ISO country code"],
     },
     timeZoneId: {
+      // type: String, //use this for seeds
       type: mongoose.Schema.Types.ObjectId,
       ref: "TimeZonesModel",
     },
