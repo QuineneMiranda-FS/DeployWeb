@@ -1,9 +1,7 @@
 $kind: http-request
 name: GET All Timezones
-url: http://localhost:3000/api/timezones?page=2
+url: http://localhost:3000/api/timezones
 method: GET
-queryParams:
-  page: "2"
 scripts:
   - type: afterResponse
     code: |-
