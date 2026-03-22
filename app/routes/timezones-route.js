@@ -9,7 +9,7 @@ const {
   getTimeZoneById,
   updateTimezoneById,
   deleteTimezoneByID,
-} = require("../controllers/timeZonesController");
+} = require("../controllers/TimeZonesController");
 
 //GET all Timezones
 router.get("/", getAllTimeZones);
