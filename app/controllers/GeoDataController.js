@@ -9,7 +9,8 @@ const GeoData = require("../models/GeoDataModel");
 
 const getGeoDataAPI = async (req, res) => {
   try {
-    const { city, lat, lon, country } = req.query;
+    const { city, lat, lon, country, sort, order, skip, limit, select } =
+      req.query;
     let dbQuery = {};
     let apiUrl = "";
 
@@ -56,12 +57,27 @@ const getGeoDataAPI = async (req, res) => {
         .status(400)
         .json({ error: "Provide 'city' or 'lat'/'lon' parameters." });
     }
+    // paginate sort and fields
+    const sortField = sort || "city"; // city default
+    const sortOrder = order === "desc" ? -1 : 1; // ascend default
+    const skipVal = parseInt(skip) || 0;
+    const limitVal = parseInt(limit) || 10;
+    const selectFields = select ? select.split(",").join(" ") : ""; // chgs "city,countryCode" to "city countryCode"
 
     // chk db
-    const existingData = await GeoData.findOne(dbQuery);
-    if (existingData)
-      return res.json({ source: "database", data: existingData });
+    const existingData = await GeoData.find(dbQuery)
+      .select(selectFields)
+      .sort({ [sortField]: sortOrder })
+      .skip(skipVal)
+      .limit(limitVal);
 
+    if (existingData.length > 0) {
+      return res.json({
+        source: "database",
+        count: existingData.length,
+        data: existingData,
+      });
+    }
     // fetch
     const response = await axios.get(apiUrl);
     console.log("Geoapify Response:", response.data); //troubleshooting
