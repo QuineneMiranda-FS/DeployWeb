@@ -1,4 +1,4 @@
-const { getGeoDataAPI } = require("../controllers/geoController");
+const { getGeoDataAPI } = require("../controllers/geoDataController");
 const GeoData = require("../models/GeoDataModel");
 
 jest.mock("../models/GeoDataModel");
