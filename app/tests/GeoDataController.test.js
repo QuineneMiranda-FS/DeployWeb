@@ -128,3 +128,5 @@ describe("GeoData Controller - getGeoDataAPI", () => {
     expect(res.json).toHaveBeenCalled();
   });
 });
+
+//see about a utility for mock / no mock swap to make it global... research what jest has for global
