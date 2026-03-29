@@ -20,7 +20,7 @@ export function useTimeZone() {
     }
   }, []);
 
-  // auto
+  // automate on load
   useEffect(() => {
     fetchTimeZones();
   }, []);
@@ -32,6 +32,7 @@ export function useTimeZone() {
       const res = await api.createTimeZone(data);
       const newEntry = res.data.data || res.data;
       setTimeZones((prev) => [newEntry, ...prev]);
+      return newEntry;
     } catch (err) {
       setError(err);
     } finally {
@@ -52,6 +53,7 @@ export function useTimeZone() {
       setTimeZones((prev) =>
         prev.map((tz) => (tz._id === id ? updatedEntry : tz)),
       );
+      return updatedEntry;
     } catch (err) {
       setError(err);
     } finally {

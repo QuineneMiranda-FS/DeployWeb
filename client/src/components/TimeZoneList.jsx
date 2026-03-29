@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Button,
@@ -12,6 +12,7 @@ import {
 } from "antd";
 import { useTimeZone } from "../hooks/useTimeZone";
 import AddTimeZoneForm from "./AddTimeZoneForm";
+import "./TimeZoneList.css";
 
 const { Title } = Typography;
 
@@ -27,6 +28,7 @@ const TimeZoneList = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [highlightedId, setHighlightedId] = useState(null);
   const [form] = Form.useForm();
 
   const handleEdit = (record) => {
@@ -39,14 +41,30 @@ const TimeZoneList = () => {
     setIsEditModalOpen(true);
   };
 
+  // highlight clears after few seconds
+  useEffect(() => {
+    if (highlightedId) {
+      const timer = setTimeout(() => setHighlightedId(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedId]);
+
   const handleUpdate = async () => {
     try {
       const values = await form.validateFields();
-      await updateTimeZone(editingRecord.id || editingRecord._id, values);
+      const id = editingRecord.id || editingRecord._id;
+      await updateTimeZone(id, values);
+      setHighlightedId(id);
       setIsEditModalOpen(false);
       setEditingRecord(null);
     } catch (info) {
       console.log("Update Failed:", info);
+    }
+  };
+  const handleAddWrapper = async (values) => {
+    const newRecord = await addTimeZone(values);
+    if (newRecord?._id || newRecord?.id) {
+      setHighlightedId(newRecord._id || newRecord.id);
     }
   };
 
@@ -95,15 +113,19 @@ const TimeZoneList = () => {
   return (
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: "20px" }}>
       <Title level={2}>Time Zone Manager</Title>
-      <AddTimeZoneForm onAdd={addTimeZone} />
+      <AddTimeZoneForm onAdd={handleAddWrapper} />
 
       <Table
         rowKey={(record) => record._id || record.id}
         dataSource={timeZones}
         columns={columns}
         loading={loading}
+        rowClassName={(record) =>
+          record._id === highlightedId || record.id === highlightedId
+            ? "highlight-row"
+            : ""
+        }
       />
-
       <Modal
         title="Edit Time Zone"
         open={isEditModalOpen}

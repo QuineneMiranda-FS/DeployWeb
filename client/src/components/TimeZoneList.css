@@ -1,0 +1,12 @@
+@keyframes highlightFade {
+  from {
+    background-color: #e6f7ff;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.highlight-row td {
+  animation: highlightFade 3s ease-in-out;
+}

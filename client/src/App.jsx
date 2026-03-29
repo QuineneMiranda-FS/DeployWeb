@@ -6,7 +6,7 @@ function App() {
     <div className="App" style={{ padding: "20px", fontFamily: "sans-serif" }}>
       <header>
         <h1>Global TimeZone Manager</h1>
-        <p>Manage and view your saved time zones below.</p>
+        <p>View, Add, Edit or Delete Timezones below.</p>
       </header>
 
       <main>
