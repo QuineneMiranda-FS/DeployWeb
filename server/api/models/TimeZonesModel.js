@@ -22,17 +22,22 @@ const timeZoneSchema = new mongoose.Schema(
       maxLength: [38, "Name CANNOT be more than 38 characters"], //longest named city is 168 characters but std db sets 38 max
     },
 
-    offset: {
-      type: String,
-      match: [/^[+-]\d{2}:\d{2}$/, "Offset must be in +/-HH:MM format"],
-    },
-
-    // from Location model
+    // offset: {
+    //   type: String,
+    //   match: [/^[+-]\d{2}:\d{2}$/, "Offset must be in +/-HH:MM format"],
+    // },
     location: {
-      // type: String, //use this for seeds
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "LocationModel",
+      type: String,
+      trim: true,
+      minLength: [3, "Name needs to be at least 3 characters"],
+      maxLength: [38, "Name CANNOT be more than 38 characters"], //longest named city is 168 characters but std db sets 38 max
     },
+    // from Location model
+    // location: {
+    //   // type: String, //use this for seeds
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "LocationModel",
+    // },
   },
   { timestamps: true },
 );

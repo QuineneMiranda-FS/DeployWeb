@@ -8,13 +8,13 @@ const api = axios.create({
   },
 });
 
-export const getTimeZone = () => api.get("/timeZone");
+export const getTimeZone = () => api.get("/timezones");
 
-export const getTimeZoneById = (id) => api.get(`/timeZone/${id}`);
+export const getTimeZoneById = (id) => api.get(`/timezones/${id}`);
 
-export const createTimeZone = (timeZone) => api.post("/timeZone", timeZone);
+export const createTimeZone = (timeZone) => api.post("/timezones", timeZone);
 
 export const updateTimeZoneById = (id, timeZone) =>
-  api.put(`/timeZone/${id}`, timeZone);
+  api.put(`/timezones/${id}`, timeZone);
 
-export const deleteTimeZoneById = (id) => api.delete(`/timeZone/${id}`);
+export const deleteTimeZoneById = (id) => api.delete(`/timezones/${id}`);

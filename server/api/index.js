@@ -1,9 +1,11 @@
 const express = require("express");
 const morgan = require("morgan");
+const cors = require("cors");
 
 const app = express();
 // Import the routes
 const routeHandler = require("./routes");
+app.use(cors()); //***CORS (must be before routes)
 //body parser
 app.use(express.json());
 //flag http calls

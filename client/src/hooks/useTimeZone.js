@@ -1,34 +1,84 @@
-import { useState, useEffect, useCallback} from 'react';
-import {getTimeZone,getTimeZonebyId,createTimeZone,updateTimezone,deleteTimeZone} from "../api/timezoneAPI";
+import { useState, useEffect, useCallback } from "react";
+import * as api from "../api/timezoneAPI"; // * so can use same naming
 
-export function (){
-    //
-    const [timeZone,setTimeZone] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+export function useTimeZone() {
+  const [timeZones, setTimeZones] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    const fetchTimeZone = useCallback(async()=>{
-        //
-        setLoading(true);
-        setError(null);
-        try {
-            const res = await getTimeZone()
-            setTimeZone(res.data);
-        } catch (error){
-            setError(error);
-        } finally {
-            setLoading(false);
-        }
-    })
-    const addTimeZone = async(data=>{
+  // Get all
+  const fetchTimeZones = useCallback(async () => {
     setLoading(true);
     try {
-        const res = await createTimeZone(data);
-        setTimezone(prev => [res.data, ..prev]);
+      const res = await api.getTimeZone();
+      console.log("Full API Response:", res.data); // testing
+      setTimeZones(res.data.data || res.data || []);
+    } catch (err) {
+      console.error("Fetch Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    } catch(error){
-        setError(error);
+  // auto
+  useEffect(() => {
+    fetchTimeZones();
+  }, []);
 
-    } finally {setLoading(false);}
-})
+  // Create
+  const addTimeZone = async (data) => {
+    setLoading(true);
+    try {
+      const res = await api.createTimeZone(data);
+      const newEntry = res.data.data || res.data;
+      setTimeZones((prev) => [newEntry, ...prev]);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update
+  const updateTimeZone = async (id, data) => {
+    setLoading(true);
+    try {
+      //fix for fields
+      const { _id, __v, ...updateData } = data;
+
+      const res = await api.updateTimeZoneById(id, updateData);
+      const updatedEntry = res.data.data || res.data;
+
+      setTimeZones((prev) =>
+        prev.map((tz) => (tz._id === id ? updatedEntry : tz)),
+      );
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete
+  const removeTimeZone = async (id) => {
+    setLoading(true);
+    try {
+      await api.deleteTimeZoneById(id);
+      setTimeZones((prev) => prev.filter((tz) => tz._id !== id));
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    timeZones,
+    loading,
+    error,
+    fetchTimeZones,
+    addTimeZone,
+    updateTimeZone,
+    removeTimeZone,
+  };
 }

@@ -63,12 +63,20 @@ const getAllTimeZones = async (req, res, next) => {
   }
 };
 
+//old working code before query
 // const getAllTimeZones = async (req, res, next) => {
 //   try {
-
 //     const timeZones = await timeZonesModel.find().populate("location");
 
-//     res.status(200).json({ success: true, data: timeZones });
+//     res.status(200).json({
+//       success: true,
+//       count: timeZones.length,
+//       data: timeZones,
+//       metadata: {
+//         hostname: req.hostname,
+//         method: req.method,
+//       },
+//     });
 //   } catch (error) {
 //     res.status(500).json({ success: false, error: error.message });
 //   }
