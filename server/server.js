@@ -3,10 +3,10 @@ require("dotenv").config();
 // const dotenv = ///don't nd
 
 //db
-const connectDB = require("./app/db/config");
+const connectDB = require("./api/db/config");
 connectDB();
 
-const app = require("./app/");
+const app = require("./api");
 
 const PORT = process.env.PORT || 3000;
 
