@@ -17,7 +17,7 @@ const getAllLocations = async (req, res, next) => {
     );
 
     // query
-    let query = LocationModel.find(JSON.parse(queryStr)).populate("timeZoneId");
+    let query = LocationModel.find(JSON.parse(queryStr));
 
     // sort
     if (req.query.sort) {
@@ -29,7 +29,7 @@ const getAllLocations = async (req, res, next) => {
 
     // paginate ..only 4 in db right now so query like 2 at a time
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 2;
+    const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
 
@@ -50,22 +50,6 @@ const getAllLocations = async (req, res, next) => {
     next(error);
   }
 };
-
-//working code before query
-// const getAllLocations = async (req, res, next) => {
-//   try {
-//     const dbLocations = await LocationModel.find({}).populate("timeZoneId");
-
-//     res.status(200).json({
-//       success: true,
-//       count: dbLocations.length,
-//       data: dbLocations,
-//       metadata: { hostname: req.hostname, method: req.method },
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 //---------------------------------------------------------------------
 // GET Location by ID
@@ -115,7 +99,7 @@ const createLocation = async (req, res, next) => {
     });
 
     // tz info
-    await newRecord.populate("timeZoneId");
+    // await newRecord.populate("timeZoneId");
 
     res.status(201).json({
       success: true,

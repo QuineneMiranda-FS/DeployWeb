@@ -34,7 +34,7 @@ const TimeZoneList = () => {
   const handleEdit = (record) => {
     const initialValues = {
       ...record,
-      location: record.location?._id || record.location,
+      location: record.locationData?._id || record.location,
     };
     setEditingRecord(record);
     form.setFieldsValue(initialValues);
@@ -50,6 +50,9 @@ const TimeZoneList = () => {
   }, [highlightedId]);
 
   const handleUpdate = async () => {
+    const id = editingRecord?._id || editingRecord?.id;
+    console.log("Updating ID:", id); // testing
+    if (!id) return console.error("No ID found for update");
     try {
       const values = await form.validateFields();
       const id = editingRecord.id || editingRecord._id;
@@ -63,31 +66,31 @@ const TimeZoneList = () => {
   };
   const handleAddWrapper = async (values) => {
     const newRecord = await addTimeZone(values);
-    if (newRecord?._id || newRecord?.id) {
-      setHighlightedId(newRecord._id || newRecord.id);
+
+    if (newRecord?._id) {
+      setHighlightedId(newRecord._id);
     }
   };
 
   const columns = [
     {
       title: "ID",
+      dataIndex: "id",
       key: "id",
-      render: (_, record) => (
-        <code style={{ fontSize: "12px", color: "#888" }}>
-          {record.id || record._id}
-        </code>
-      ),
+      render: (text) => <code style={{ color: "#888" }}>{text}</code>,
     },
     { title: "Abbr", dataIndex: "name", key: "name" },
     { title: "Full Name (IANA)", dataIndex: "fullName", key: "fullName" },
     {
       title: "Location",
-      key: "location",
-      render: (_, record) => {
-        const loc = record.location;
-        if (!loc) return "-";
-        return typeof loc === "object" ? loc.name || loc.city || loc._id : loc;
-      },
+      dataIndex: "cityName",
+      key: "cityName",
+      render: (text) => text || "Unknown City",
+    },
+    //testing
+    {
+      title: "Debug ID",
+      render: (_, record) => <span>Match ID: {record.id}</span>,
     },
     {
       title: "Action",
@@ -113,7 +116,7 @@ const TimeZoneList = () => {
   return (
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: "20px" }}>
       <Title level={2}>Time Zone Manager</Title>
-      <AddTimeZoneForm onAdd={handleAddWrapper} />
+      <AddTimeZoneForm onAdd={handleAddWrapper} locations={locations} />
 
       <Table
         rowKey={(record) => record._id || record.id}
@@ -150,8 +153,23 @@ const TimeZoneList = () => {
             <Input placeholder="Eastern Standard Time" />
           </Form.Item>
 
-          <Form.Item name="location" label="Location">
-            <Input placeholder="Location" />
+          <Form.Item name="location" style={{ width: 200 }}>
+            <Select
+              mode="tags"
+              maxCount={1}
+              placeholder="Select or type city"
+              filterOption={(input, option) =>
+                (option?.children ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            >
+              {locations.map((loc) => (
+                <Select.Option key={loc._id} value={loc._id}>
+                  {loc.cityName}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

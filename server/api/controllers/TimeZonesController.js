@@ -1,4 +1,6 @@
 const timeZonesModel = require("../models/TimeZonesModel");
+const LocationModel = require("../models/LocationModel");
+const Counter = require("../models/CounterModel");
 
 const getAllTimeZones = async (req, res, next) => {
   try {
@@ -34,19 +36,19 @@ const getAllTimeZones = async (req, res, next) => {
       query = query.select(fields);
     }
 
-    // sort - defaults to name
+    // sort
     const sortBy = req.query.sort
       ? req.query.sort.split(",").join(" ")
-      : "name";
+      : "-updatedAt";
     query = query.sort(sortBy);
 
     // paginate
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10; //set low since only 8 in db right now
+    const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
 
-    const timeZones = await query.populate("location");
+    const timeZones = await query.populate("locationData");
 
     res.status(200).json({
       success: true,
@@ -63,29 +65,19 @@ const getAllTimeZones = async (req, res, next) => {
   }
 };
 
-// const getAllTimeZones = async (req, res, next) => {
-//   try {
-
-//     const timeZones = await timeZonesModel.find().populate("location");
-
-//     res.status(200).json({ success: true, data: timeZones });
-//   } catch (error) {
-//     res.status(500).json({ success: false, error: error.message });
-//   }
-// };
-
 //---------------------------------------------------------------------
 //below keeps jest from trying to test so stats not low
 /* istanbul ignore next */
 const getTimeZoneById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const timeZone = await timeZonesModel.findById(id).populate("location");
+    const timeZone = await timeZonesModel.findById(id).populate("locationData");
 
     if (!timeZone) {
-      const error = new Error(`Timezone ID: ${id} not found.`);
-      error.status = 404;
-      return next(error);
+      return res.status(404).json({
+        success: false,
+        message: `Timezone ID: ${id} not found.`,
+      });
     }
 
     res.status(200).json({ success: true, data: timeZone });
@@ -99,29 +91,35 @@ const getTimeZoneById = async (req, res, next) => {
 /* istanbul ignore next */
 const createTimezone = async (req, res, next) => {
   try {
-    const { name, fullName, offset, location } = req.body;
+    const { name, fullName, cityName, countryCode } = req.body;
 
-    if (!name || !fullName) {
+    if (!cityName || !name) {
       return res
         .status(400)
-        .json({ message: "Name and fullName are required" });
+        .json({ success: false, message: "Required fields missing" });
     }
 
-    const newRecord = await timeZonesModel.create({
-      name,
-      fullName,
-      offset,
-      location,
+    let locationDoc = await LocationModel.findOne({
+      cityName: { $regex: `^${cityName.trim()}$`, $options: "i" },
     });
 
-    await newRecord.populate("location");
+    if (!locationDoc) {
+      locationDoc = await LocationModel.create({
+        cityName: cityName.trim(),
+        countryCode: countryCode || "US",
+      });
+    }
 
-    res.status(201).json({
-      success: true,
-      data: newRecord,
-      message: "Timezone created successfully",
+    const newRecord = await timeZonesModel.create({ name, fullName });
+
+    await LocationModel.findByIdAndUpdate(locationDoc._id, {
+      timeZoneId: newRecord._id,
     });
+
+    await newRecord.populate("locationData");
+    res.status(201).json({ success: true, data: newRecord });
   } catch (error) {
+    console.error("CREATE ERROR:", error); //testing
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -133,29 +131,50 @@ const createTimezone = async (req, res, next) => {
 const updateTimezoneById = async (req, res, next) => {
   try {
     const { id } = req.params;
+    let { cityName, name, fullName, countryCode } = req.body;
 
-    const updatedTZ = await timeZonesModel
-      .findByIdAndUpdate(id, req.body, {
-        new: true,
-        runValidators: true,
-      })
-      .populate("location");
-
-    if (!updatedTZ) {
-      return res
-        .status(404)
-        .json({ success: false, message: `Timezone ID: ${id} not found.` });
+    if (Array.isArray(cityName)) {
+      cityName = cityName[0];
     }
 
-    res.status(200).json({
-      success: true,
-      data: updatedTZ,
-    });
+    const safeCityName = cityName ? String(cityName).trim() : null;
+
+    await timeZonesModel.findByIdAndUpdate(
+      id,
+      { name, fullName },
+      { returnDocument: "after" },
+    );
+
+    if (safeCityName) {
+      let locationDoc = await LocationModel.findOne({
+        cityName: { $regex: `^${safeCityName}$`, $options: "i" },
+      });
+
+      if (!locationDoc) {
+        locationDoc = await LocationModel.create({
+          cityName: safeCityName,
+          countryCode: countryCode || "US",
+          fullCityName: safeCityName,
+        });
+      }
+
+      await LocationModel.updateMany(
+        { timeZoneId: id },
+        { $set: { timeZoneId: null } },
+      );
+      await LocationModel.findByIdAndUpdate(locationDoc._id, {
+        timeZoneId: id,
+      });
+    }
+
+    const finalResult = await timeZonesModel
+      .findById(id)
+      .populate("locationData");
+    res.status(200).json({ success: true, data: finalResult });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
 //---------------------------------------------------------------------
 // DELETE by ID
 //below keeps jest from trying to test so stats not low

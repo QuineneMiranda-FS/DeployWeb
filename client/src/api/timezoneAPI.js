@@ -14,7 +14,9 @@ export const getTimeZoneById = (id) => api.get(`/timezones/${id}`);
 
 export const createTimeZone = (timeZone) => api.post("/timezones", timeZone);
 
-export const updateTimeZoneById = (id, timeZone) =>
-  api.put(`/timezones/${id}`, timeZone);
+export const updateTimeZoneById = (id, data) =>
+  api.put(`/timezones/${id}`, data);
 
 export const deleteTimeZoneById = (id) => api.delete(`/timezones/${id}`);
+
+export const getLocations = () => api.get("/locations");

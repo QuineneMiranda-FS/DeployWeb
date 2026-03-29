@@ -8,6 +8,7 @@ const routeHandler = require("./routes");
 app.use(cors()); //***CORS (must be before routes)
 //body parser
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 //flag http calls
 app.use(morgan("dev"));
 

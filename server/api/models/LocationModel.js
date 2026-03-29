@@ -1,10 +1,13 @@
 const mongoose = require("mongoose");
+const Counter = require("./CounterModel");
 
 const LocationSchema = new mongoose.Schema(
   {
+    _id: { type: String },
     cityName: {
       type: String,
       required: [true, "City is required"],
+      unique: true,
       trim: true,
       minLength: [3, "City name must be at least 3 characters"],
       maxLength: [50, "City name cannot exceed 50 characters"],
@@ -23,9 +26,8 @@ const LocationSchema = new mongoose.Schema(
       match: [/^[A-Z]{2}$/, "Please provide a valid 2-letter ISO country code"],
     },
     timeZoneId: {
-      // type: String, //use this for seeds
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "TimeZonesModel",
+      type: String,
+      ref: "TimeZone",
     },
     postcode: {
       type: String,
@@ -43,5 +45,21 @@ const LocationSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+LocationSchema.pre("save", async function () {
+  if (!this.isNew || (this._id && this._id.startsWith("loc_"))) return;
 
+  try {
+    if (this.isNew) {
+      const counter = await Counter.findByIdAndUpdate(
+        { _id: "location_id" },
+        { $inc: { seq: 1 } },
+        { returnDocument: "after", upsert: true },
+      );
+      this._id = `loc_${100 + counter.seq}`;
+    }
+  } catch (error) {
+    console.error("Counter Error:", error);
+    throw error;
+  }
+});
 module.exports = mongoose.model("Location", LocationSchema);

@@ -1,42 +1,66 @@
 import React from "react";
-import { Form, Input, Button, Card } from "antd";
+import { Form, Input, Button, Select } from "antd";
 
-const AddTimeZoneForm = ({ onAdd }) => {
+const AddTimeZoneForm = ({ onAdd, locations }) => {
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    await onAdd(values);
-    form.resetFields(); // Clear
+    const locationId = Array.isArray(values.location)
+      ? values.location[0]
+      : values.location;
+
+    const selectedLocation = locations.find((loc) => loc._id === locationId);
+
+    const submissionValues = {
+      name: values.name,
+      fullName: values.fullName,
+      cityName: selectedLocation ? selectedLocation.cityName : locationId,
+      countryCode: "US",
+    };
+
+    await onAdd(submissionValues);
+    form.resetFields();
   };
 
   return (
-    <Card style={{ marginBottom: 20 }}>
-      <Form form={form} layout="inline" onFinish={onFinish}>
-        <Form.Item
-          name="name"
-          label="Name"
-          rules={[{ required: true, message: "Please input a name!" }]}
-        >
-          <Input placeholder="EST" />
-        </Form.Item>
-        <Form.Item
-          name="fullName"
-          label="Full Name (IANA)"
-          rules={[{ required: true, max: 38 }]}
-        >
-          <Input placeholder="Eastern Standard Time" />
-        </Form.Item>
+    <Form
+      form={form}
+      onFinish={onFinish}
+      layout="inline"
+      style={{ marginBottom: 20 }}
+    >
+      <Form.Item name="name" rules={[{ required: true, message: "Required" }]}>
+        <Input placeholder="Abbr (e.g. EST)" style={{ width: 120 }} />
+      </Form.Item>
 
-        <Form.Item name="location" label="Location">
-          <Input placeholder="City" />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Add Timezone
-          </Button>
-        </Form.Item>
-      </Form>
-    </Card>
+      <Form.Item
+        name="fullName"
+        rules={[{ required: true, message: "Required" }]}
+      >
+        <Input placeholder="Full Name (IANA)" style={{ width: 200 }} />
+      </Form.Item>
+
+      <Form.Item name="location" style={{ width: 200 }}>
+        <Select
+          mode="tags"
+          maxCount={1}
+          placeholder="Select or type city"
+          filterOption={(input, option) =>
+            (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+          }
+        >
+          {locations.map((loc) => (
+            <Select.Option key={loc._id} value={loc._id}>
+              {loc.cityName}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Button type="primary" htmlType="submit">
+        Add
+      </Button>
+    </Form>
   );
 };
 
