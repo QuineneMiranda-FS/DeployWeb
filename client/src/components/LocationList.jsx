@@ -44,13 +44,14 @@ const LocationList = () => {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
-      console.log("Form Values:", values); // testing
 
       if (editingRecord) {
         await updateLocation(editingRecord._id || editingRecord.id, values);
       } else {
         await addLocation(values);
       }
+
+      if (refresh) await refresh();
 
       setIsModalOpen(false);
       form.resetFields();
@@ -66,8 +67,10 @@ const LocationList = () => {
       dataIndex: "timeZoneId",
       key: "timezone",
       render: (tzId) => {
-        const match = timeZones.find((tz) => tz.id === tzId || tz._id === tzId);
-        return match ? `${match.name} (${match.fullName})` : tzId || "N/A";
+        const match = timeZones.find(
+          (tz) => (tz.id || tz._id)?.toString() === tzId?.toString(),
+        );
+        return match ? `${match.name} (${match.fullName})` : "N/A";
       },
     },
     {
@@ -149,7 +152,17 @@ const LocationList = () => {
             label="Assign Timezone"
             rules={[{ required: true }]}
           >
-            <Select placeholder="Select a timezone" loading={tzLoading}>
+            <Select
+              showSearch
+              placeholder="Select a timezone"
+              loading={tzLoading}
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.children ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            >
               {timeZones.map((tz) => (
                 <Option key={tz._id || tz.id} value={tz.id || tz._id}>
                   {tz.name} - {tz.fullName}

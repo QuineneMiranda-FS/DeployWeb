@@ -48,21 +48,25 @@ export const useLocation = () => {
     setLoading(true);
     setError(null);
     try {
-      const enrichedPayload = {
+      const res = await api.createLocation({
         ...locationData,
-        fullCityName:
-          locationData.fullCityName ||
-          `${locationData.cityName}, ${locationData.countryCode}`,
-        timeZoneId: locationData.timeZoneId,
-      };
+        fullCityName: `${locationData.cityName}, ${locationData.countryCode}`,
+      });
 
-      console.log("Final Payload to API:", enrichedPayload); // testing
-
-      const res = await api.createLocation(enrichedPayload);
       const newRecord = res.data.data || res.data;
 
-      setLocations((prev) => [newRecord, ...prev]);
-      return newRecord;
+      const tzMatch = timeZones.find(
+        (tz) => (tz.id || tz._id) === newRecord.timeZoneId,
+      );
+
+      const enrichedRecord = {
+        ...newRecord,
+        tzName: tzMatch ? tzMatch.name : "N/A",
+        tzFullName: tzMatch ? tzMatch.fullName : "Unknown",
+      };
+
+      setLocations((prev) => [enrichedRecord, ...prev]);
+      return enrichedRecord;
     } catch (err) {
       const serverMessage = err.response?.data?.message || err.message;
       console.error("Add Location Error:", serverMessage);
