@@ -88,10 +88,10 @@ const TimeZoneList = () => {
       render: (text) => text || "Unknown City",
     },
     //testing
-    {
-      title: "Debug ID",
-      render: (_, record) => <span>Match ID: {record.id}</span>,
-    },
+    // {
+    //   title: "Debug ID",
+    //   render: (_, record) => <span>Match ID: {record.id}</span>,
+    // },
     {
       title: "Action",
       key: "action",

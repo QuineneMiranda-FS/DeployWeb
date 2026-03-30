@@ -38,7 +38,7 @@ timeZoneSchema.virtual("locationData", {
   justOne: true,
 });
 
-// Auto-increment for _id
+// Auto for _id
 timeZoneSchema.pre("save", async function () {
   try {
     if (this.isNew) {

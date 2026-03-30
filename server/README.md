@@ -19,3 +19,9 @@ Server Side Languages
 -API Testing
 
 -Note: You will need a key for GeoApify API, go here: https://apidocs.geoapify.com/ , sign up, put key in your .env file
+
+## Week 3
+
+-Add React Frontend
+-Test functioning
+-Cleanup Code

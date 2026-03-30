@@ -1,5 +1,6 @@
 import React from "react";
 import TimeZoneList from "./components/TimeZoneList";
+import LocationList from "./components/LocationList";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <main>
         <div>
           <TimeZoneList />
+          <LocationList />
         </div>
       </main>
     </div>

@@ -81,7 +81,14 @@ const getLocationById = async (req, res, next) => {
 /* istanbul ignore next */
 const createLocation = async (req, res, next) => {
   try {
-    const { cityName, fullCityName, timeZoneId, postcode, region } = req.body;
+    const {
+      cityName,
+      fullCityName,
+      countryCode,
+      timeZoneId,
+      postcode,
+      region,
+    } = req.body;
 
     if (!cityName || !fullCityName) {
       return res.status(400).json({
@@ -93,13 +100,11 @@ const createLocation = async (req, res, next) => {
     const newRecord = await LocationModel.create({
       cityName,
       fullCityName,
+      countryCode,
       timeZoneId,
       postcode,
       region,
     });
-
-    // tz info
-    // await newRecord.populate("timeZoneId");
 
     res.status(201).json({
       success: true,
