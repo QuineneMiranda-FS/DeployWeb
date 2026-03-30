@@ -20,8 +20,8 @@ Server Side Languages
 
 -Note: You will need a key for GeoApify API, go here: https://apidocs.geoapify.com/ , sign up, put key in your .env file
 
-## Week 3
+## Week 4
 
 -Add React Frontend
 -Test functioning
--Cleanup Code
+-Cleanup old code
