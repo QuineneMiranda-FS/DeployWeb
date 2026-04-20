@@ -1,8 +1,0 @@
-$kind: http-request
-name: GET from Geo API call by lat/long
-url: http://localhost:3000/api/geoData?lat=51.5074&lon=-0.1278
-method: GET
-queryParams:
-  lat: "51.5074"
-  lon: "-0.1278"
-order: 891947737139543

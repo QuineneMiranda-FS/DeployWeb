@@ -1,8 +1,0 @@
-$kind: http-request
-name: POST New Location
-url: http://localhost:3000/api/locations
-method: POST
-body:
-  type: json
-  content: '{"cityName":"LDN","fullCityName":"London"}'
-order: 129892305584213

@@ -1,13 +1,20 @@
 //this separates api calls from React
 import axios from "axios";
 
+// const api = axios.create({
+//   baseURL: "http://localhost:3000/api",
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+// });
+
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
+  // This will use the Netlify variable in production or localhost in development
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
   headers: {
     "Content-Type": "application/json",
   },
 });
-
 export const getTimeZone = () => api.get("/timezones");
 
 export const getTimeZoneById = (id) => api.get(`/timezones/${id}`);

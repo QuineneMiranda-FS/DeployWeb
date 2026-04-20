@@ -1,8 +1,8 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const morgan = require("morgan");
 const mongoose = require("mongoose");
-const cors = require("cors");
 
 const timeZoneRoutes = require("../api/routes/timezones-route");
 const locationRoutes = require("../api/routes/location-route");
@@ -13,7 +13,15 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(cors());
+// Use CORS middleware
+app.use(
+  cors({
+    // Replace with your actual Netlify URL
+    origin: "https://wdv463.netlify.app/",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  }),
+);
 
 //Router
 app.use("/timeZones", timeZoneRoutes);

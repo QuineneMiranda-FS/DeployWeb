@@ -1,8 +1,0 @@
-$kind: http-request
-name: GET Stored Geo by Date Range
-url: http://localhost:3000/api/geoData/stored?start=2026-03-19&end=2026-03-21
-method: GET
-queryParams:
-  start: 2026-03-19
-  end: 2026-03-21
-order: 866012689789218
