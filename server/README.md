@@ -1,27 +1,5 @@
-# WDV353
+# WDV463
 
-Server Side Languages
+# Deployment of Web Services
 
-## Week 1
-
--Setup Environment: NPM, NODE Modules, NodeJS, GitHub, Postman
--Create NodeJS code
-
-## Week 2
-
--Split Router into Routes, Add Controllers, Add Models
--Add MongoDB Testing
-
-## Week 3
-
--GeoSpatial API with MongoDB
--API Query Data fm DB
--API Testing
-
--Note: You will need a key for GeoApify API, go here: https://apidocs.geoapify.com/ , sign up, put key in your .env file
-
-## Week 4
-
--Add React Frontend
--Test functioning
--Cleanup old code
+## Miranda Quinene
