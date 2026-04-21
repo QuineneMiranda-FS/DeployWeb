@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
-  // DEBUG: This will show what Render is actually seeing
-  console.log("DEBUG: Connection URI is:", process.env.MONGODB_URI);
-  //try catch if errors out
+  // This will print all keys Render has injected
+  console.log("Available Env Keys:", Object.keys(process.env));
+
+  if (!process.env.MONGODB_URI) {
+    throw new Error("CRITICAL: MONGODB_URI is missing from process.env");
+  }
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
     console.log(`MongoDB is successfully connected to ${conn.connection.host}`);
