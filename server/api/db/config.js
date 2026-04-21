@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
+  // DEBUG: This will show what Render is actually seeing
+  console.log("DEBUG: Connection URI is:", process.env.MONGODB_URI);
   //try catch if errors out
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
