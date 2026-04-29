@@ -4,37 +4,42 @@ const LocationModel = require("../models/LocationModel");
 // [ ?countryCode=US&sort=cityName&page=1&limit=10 ]
 const getAllLocations = async (req, res, next) => {
   try {
-    // field exclude
+    
+    const excludedFields = ["sort", "page", "limit", "fields", "cityName", "fullCityName"];
+    const regexFields = ["cityName", "fullCityName"]; 
+    
     let queryObj = { ...req.query };
-    const excludedFields = ["sort", "page", "limit", "fields"];
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    // filter
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(
-      /\b(gt|gte|lt|lte|in)\b/g,
-      (match) => `$${match}`,
-    );
+    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
+    let finalQuery = JSON.parse(queryStr);
 
-    // query
-    let query = LocationModel.find(JSON.parse(queryStr));
+    regexFields.forEach((field) => {
+      if (req.query[field]) {
+        finalQuery[field] = { $regex: req.query[field], $options: "i" };
+      }
+    });
 
-    // sort
+    let query = LocationModel.find(finalQuery);
+
+    const formatParam = (param) => 
+      (Array.isArray(param) ? param.join(",") : param || "").split(",").join(" ").trim();
+
     if (req.query.sort) {
-      const sortBy = req.query.sort.split(",").join(" ");
-      query = query.sort(sortBy);
+      query = query.sort(formatParam(req.query.sort));
     } else {
-      query = query.sort("-createdAt"); // default
+      query = query.sort("-createdAt");
     }
 
-    // paginate ..only 4 in db right now so query like 2 at a time
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
+    
     query = query.skip(skip).limit(limit);
 
     const dbLocations = await query;
-    const total = await LocationModel.countDocuments(JSON.parse(queryStr));
+    const total = await LocationModel.countDocuments(finalQuery); /
 
     res.status(200).json({
       success: true,
@@ -50,7 +55,6 @@ const getAllLocations = async (req, res, next) => {
     next(error);
   }
 };
-
 //---------------------------------------------------------------------
 // GET Location by ID
 //below keeps jest from trying to test so stats not low

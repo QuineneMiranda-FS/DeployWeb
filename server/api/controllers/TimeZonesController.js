@@ -2,63 +2,66 @@ const timeZonesModel = require("../models/TimeZonesModel");
 const LocationModel = require("../models/LocationModel");
 const Counter = require("../models/CounterModel");
 
+// GET All Locations
 const getAllTimeZones = async (req, res, next) => {
   try {
-    // filter
+    const excludedFields = [
+      "select",
+      "sort",
+      "page",
+      "limit",
+      "name",
+      "fullName",
+    ];
+    const regexFields = ["name", "fullName"];
+
     const queryObj = { ...req.query };
-    const excludedFields = ["select", "sort", "page", "limit"];
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    // operators
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(
       /\b(gt|gte|lt|lte|in)\b/g,
       (match) => `$${match}`,
     );
-
     let finalQuery = JSON.parse(queryStr);
 
-    // partial matching/ case sensitivity
-    if (req.query.name) {
-      finalQuery.name = { $regex: req.query.name, $options: "i" };
-    }
-    if (req.query.fullName) {
-      finalQuery.fullName = { $regex: req.query.fullName, $options: "i" };
-    }
+    regexFields.forEach((field) => {
+      if (req.query[field]) {
+        finalQuery[field] = { $regex: req.query[field], $options: "i" };
+      }
+    });
 
-    // query
     let query = timeZonesModel.find(finalQuery);
 
-    // fields
+    const formatQueryParam = (param) =>
+      (Array.isArray(param) ? param.join(",") : param || "")
+        .split(",")
+        .join(" ")
+        .trim();
+
     if (req.query.select) {
-      //multiple
-      const fields = req.query.select.split(",").join(" ");
-      query = query.select(fields);
+      query = query.select(formatQueryParam(req.query.select));
     }
 
-    // sort
     const sortBy = req.query.sort
-      ? req.query.sort.split(",").join(" ")
+      ? formatQueryParam(req.query.sort)
       : "-updatedAt";
     query = query.sort(sortBy);
 
-    // paginate
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    query = query.skip(skip).limit(limit);
 
-    const timeZones = await query.populate("locationData");
+    const timeZones = await query
+      .skip(skip)
+      .limit(limit)
+      .populate("locationData");
 
     res.status(200).json({
       success: true,
       count: timeZones.length,
       page,
       data: timeZones,
-      metadata: {
-        hostname: req.hostname,
-        method: req.method,
-      },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -182,20 +185,21 @@ const updateTimezoneById = async (req, res, next) => {
 const deleteTimezoneByID = async (req, res, next) => {
   try {
     const { id } = req.params;
+
     const deletedRecord = await timeZonesModel.findByIdAndDelete(id);
 
     if (!deletedRecord) {
-      return res
-        .status(404)
-        .json({ success: false, message: `Timezone ID: ${id} not found.` });
+      return res.status(404).json({ success: false, message: "ID not found" });
     }
 
-    res.status(200).json({
-      success: true,
-      message: `ID ${id} deleted successfully`,
-    });
+    await LocationModel.updateMany(
+      { timeZoneId: id },
+      { $set: { timeZoneId: null } },
+    );
+
+    res.status(200).json({ success: true, message: `Deleted successfully` });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 };
 
