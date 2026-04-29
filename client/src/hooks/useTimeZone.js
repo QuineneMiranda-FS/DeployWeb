@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import * as api from "../api/timezoneAPI"; //* so can use naming
+import * as api from "../api/timezoneAPI";
 
 export const useTimeZone = () => {
   const [timeZones, setTimeZones] = useState([]);
@@ -28,7 +28,7 @@ export const useTimeZone = () => {
 
         return {
           ...tz,
-          id: currentTzId, //  Debug ID
+          id: currentTzId,
           cityName: cityMatch ? cityMatch.cityName : "Unknown City",
         };
       });
@@ -85,11 +85,9 @@ export const useTimeZone = () => {
         (loc) => String(loc.timeZoneId) === String(id),
       );
 
-      const enrichedUpdate = {
-        ...updatedRecord,
-        id: updatedRecord._id || id,
-        cityName: cityMatch ? cityMatch.cityName : cityName || "Unknown City",
-      };
+      setTimeZones((prev) =>
+        prev.map((tz) => ((tz.id || tz._id) === id ? enrichedUpdate : tz)),
+      );
 
       setTimeZones((prev) => {
         const filtered = prev.filter((tz) => (tz.id || tz._id) !== id);

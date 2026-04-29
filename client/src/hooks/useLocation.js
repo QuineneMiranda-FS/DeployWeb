@@ -22,7 +22,9 @@ export const useLocation = () => {
 
       // Link locations to timezone
       const enrichedLocs = rawLocs.map((loc) => {
-        const tzMatch = rawTzs.find((tz) => tz.id === loc.timeZoneId);
+        const tzMatch = rawTzs.find(
+          (tz) => (tz._id || tz.id) === loc.timeZoneId,
+        );
         return {
           ...loc,
           tzName: tzMatch ? tzMatch.name : "N/A",

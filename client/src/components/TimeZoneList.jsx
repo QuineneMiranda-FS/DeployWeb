@@ -50,7 +50,7 @@ const TimeZoneList = () => {
 
   const handleUpdate = async () => {
     const id = editingRecord?._id || editingRecord?.id;
-    console.log("Updating ID:", id); // testing
+    console.log("Updating ID:", id);
     if (!id) return console.error("No ID found for update");
     try {
       const values = await form.validateFields();

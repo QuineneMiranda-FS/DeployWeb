@@ -3,8 +3,12 @@ require("dotenv").config();
 // const dotenv = ///don't nd
 
 //db
-const connectDB = require("./api/db/config");
-connectDB();
+//// '0.0.0.0' for  Render
+connectDB().then(() => {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server is on ${PORT}`);
+  });
+});
 
 const app = require("./api");
 
@@ -14,7 +18,6 @@ const PORT = process.env.PORT || 3000;
 //   console.log(`Server is on ${PORT}`);
 // });
 
-// '0.0.0.0' for  Render
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is on ${PORT}`);
 });
