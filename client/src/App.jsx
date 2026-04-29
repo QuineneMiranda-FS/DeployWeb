@@ -7,7 +7,8 @@ import {
 } from "react-router-dom";
 import TimeZoneList from "./components/TimeZoneList";
 import LocationList from "./components/LocationList";
-import Login from "./components/Login"; // You'll need to create this
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 
@@ -29,11 +30,15 @@ function App() {
         >
           <div>
             <h1>Global TimeZone Manager</h1>
-            <p>View, Add, Edit or Delete Timezones below.</p>
+            {/* Show description only when logged in */}
+            {user && <p>View, Add, Edit or Delete Timezones below.</p>}
           </div>
-          {/* Show Logout button only if user is logged in */}
+
           {user && (
-            <button onClick={logout} style={{ height: "fit-content" }}>
+            <button
+              onClick={logout}
+              style={{ height: "fit-content", cursor: "pointer" }}
+            >
               Logout
             </button>
           )}
@@ -41,8 +46,9 @@ function App() {
 
         <main>
           <Routes>
-            {/* Public Route */}
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
             {/* Protected Routes */}
             <Route
@@ -57,7 +63,7 @@ function App() {
               }
             />
 
-            {/* Redirect any unknown routes to home */}
+            {/* Redirect home */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
