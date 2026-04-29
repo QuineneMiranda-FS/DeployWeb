@@ -16,7 +16,6 @@ app.use(express.json());
 // Use CORS middleware
 app.use(
   cors({
-    // Replace with your actual Netlify URL
     origin: "https://wdv463.netlify.app/",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,

@@ -41,7 +41,6 @@ const TimeZoneList = () => {
     setIsEditModalOpen(true);
   };
 
-  // highlight clears after few seconds
   useEffect(() => {
     if (highlightedId) {
       const timer = setTimeout(() => setHighlightedId(null), 3000);

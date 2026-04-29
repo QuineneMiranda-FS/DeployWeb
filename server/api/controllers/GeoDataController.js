@@ -1,5 +1,5 @@
 const axios = require("axios");
-const mongoose = require("mongoose"); // Added for validation /error handling
+const mongoose = require("mongoose"); 
 const GeoData = require("../models/GeoDataModel");
 
 // GET from API [ /api/geo-data? ]
@@ -58,13 +58,13 @@ const getGeoDataAPI = async (req, res) => {
         .json({ error: "Provide 'city' or 'lat'/'lon' parameters." });
     }
     // paginate sort and fields
-    const sortField = sort || "city"; // city default
-    const sortOrder = order === "desc" ? -1 : 1; // ascend default
+    const sortField = sort || "city"; 
+    const sortOrder = order === "desc" ? -1 : 1; 
     const skipVal = parseInt(skip) || 0;
     const limitVal = parseInt(limit) || 10;
-    const selectFields = select ? select.split(",").join(" ") : ""; // chgs "city,countryCode" to "city countryCode"
+    const selectFields = select ? select.split(",").join(" ") : ""; countryCode" to "city countryCode"
 
-    // chk db
+
     const existingData = await GeoData.find(dbQuery)
       .select(selectFields)
       .sort({ [sortField]: sortOrder })
@@ -78,15 +78,15 @@ const getGeoDataAPI = async (req, res) => {
         data: existingData,
       });
     }
-    // fetch
+    
     const response = await axios.get(apiUrl);
-    console.log("Geoapify Response:", response.data); //troubleshooting
+    console.log("Geoapify Response:", response.data); 
     const result = response.data.results?.[0];
 
     if (!result)
       return res.status(404).json({ error: "Location not found via Geoapify" });
 
-    // sv
+   
     const newGeoRecord = new GeoData({
       city: (result.city || city || "Unknown").toLowerCase(),
       countryCode: result.country_code,
@@ -115,19 +115,7 @@ const getGeoDataAPI = async (req, res) => {
     });
   }
 };
-//---------------------------------------------------------------------
-// POST (CREATE) & sv to db [ /api/geoData ] *** make sure raw json
-//body should look like this: {
-//   "city": "moscow",
-//   "countryCode": "ru",
-//   "postcode": "101000",
-//   "location": {
-//     "type": "Point",
-//     "coordinates": [37.6173, 55.7558]
-//   }
-// }
-//below keeps jest from trying to test so stats not low
-/* istanbul ignore next */
+
 const createGeoData = async (req, res) => {
   try {
     const newEntry = new GeoData(req.body);
@@ -143,14 +131,10 @@ const createGeoData = async (req, res) => {
   }
 };
 
-//---------------------------------------------------------------------
-// GET by id [ /api/geoData/ ] *you only need to type/paste id numbers
-//looks like this: http://localhost:3000/api/geoData/69bcb72106932c5dcd6c1bf3
-//below keeps jest from trying to test so stats not low
-/* istanbul ignore next */
+
 const getGeoDataById = async (req, res) => {
   try {
-    // validate db
+    
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ error: "Invalid ID format" });
     }
@@ -163,10 +147,7 @@ const getGeoDataById = async (req, res) => {
   }
 };
 
-//---------------------------------------------------------------------
-// GET ALL fm stored data [ /api/geoData/stored ]
-//below keeps jest from trying to test so stats not low
-/* istanbul ignore next */
+
 const getStoredGeoData = async (req, res) => {
   try {
     const { city, countryCode, start, end } = req.query;
@@ -175,7 +156,6 @@ const getStoredGeoData = async (req, res) => {
     if (city) filter.city = city.toLowerCase();
     if (countryCode) filter.countryCode = countryCode.toLowerCase();
 
-    // validate dates
     if (start || end) {
       filter.createdAt = {};
       if (start) {
