@@ -1,5 +1,5 @@
 const axios = require("axios");
-const mongoose = require("mongoose"); 
+const mongoose = require("mongoose");
 const GeoData = require("../models/GeoDataModel");
 
 // GET from API [ /api/geo-data? ]
@@ -58,12 +58,11 @@ const getGeoDataAPI = async (req, res) => {
         .json({ error: "Provide 'city' or 'lat'/'lon' parameters." });
     }
     // paginate sort and fields
-    const sortField = sort || "city"; 
-    const sortOrder = order === "desc" ? -1 : 1; 
+    const sortField = sort || "city";
+    const sortOrder = order === "desc" ? -1 : 1;
     const skipVal = parseInt(skip) || 0;
     const limitVal = parseInt(limit) || 10;
-    const selectFields = select ? select.split(",").join(" ") : ""; countryCode" to "city countryCode"
-
+    const selectFields = select ? select.split(",").join(" ") : "";
 
     const existingData = await GeoData.find(dbQuery)
       .select(selectFields)
@@ -78,15 +77,14 @@ const getGeoDataAPI = async (req, res) => {
         data: existingData,
       });
     }
-    
+
     const response = await axios.get(apiUrl);
-    console.log("Geoapify Response:", response.data); 
+    console.log("Geoapify Response:", response.data);
     const result = response.data.results?.[0];
 
     if (!result)
       return res.status(404).json({ error: "Location not found via Geoapify" });
 
-   
     const newGeoRecord = new GeoData({
       city: (result.city || city || "Unknown").toLowerCase(),
       countryCode: result.country_code,
@@ -131,10 +129,8 @@ const createGeoData = async (req, res) => {
   }
 };
 
-
 const getGeoDataById = async (req, res) => {
   try {
-    
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ error: "Invalid ID format" });
     }
@@ -146,7 +142,6 @@ const getGeoDataById = async (req, res) => {
     res.status(500).json({ error: "Search failed", details: err.message });
   }
 };
-
 
 const getStoredGeoData = async (req, res) => {
   try {

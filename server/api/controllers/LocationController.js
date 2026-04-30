@@ -4,15 +4,24 @@ const LocationModel = require("../models/LocationModel");
 // [ ?countryCode=US&sort=cityName&page=1&limit=10 ]
 const getAllLocations = async (req, res, next) => {
   try {
-    
-    const excludedFields = ["sort", "page", "limit", "fields", "cityName", "fullCityName"];
-    const regexFields = ["cityName", "fullCityName"]; 
-    
+    const excludedFields = [
+      "sort",
+      "page",
+      "limit",
+      "fields",
+      "cityName",
+      "fullCityName",
+    ];
+    const regexFields = ["cityName", "fullCityName"];
+
     let queryObj = { ...req.query };
     excludedFields.forEach((el) => delete queryObj[el]);
 
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
+    queryStr = queryStr.replace(
+      /\b(gt|gte|lt|lte|in)\b/g,
+      (match) => `$${match}`,
+    );
     let finalQuery = JSON.parse(queryStr);
 
     regexFields.forEach((field) => {
@@ -23,8 +32,11 @@ const getAllLocations = async (req, res, next) => {
 
     let query = LocationModel.find(finalQuery);
 
-    const formatParam = (param) => 
-      (Array.isArray(param) ? param.join(",") : param || "").split(",").join(" ").trim();
+    const formatParam = (param) =>
+      (Array.isArray(param) ? param.join(",") : param || "")
+        .split(",")
+        .join(" ")
+        .trim();
 
     if (req.query.sort) {
       query = query.sort(formatParam(req.query.sort));
@@ -35,11 +47,11 @@ const getAllLocations = async (req, res, next) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    
+
     query = query.skip(skip).limit(limit);
 
     const dbLocations = await query;
-    const total = await LocationModel.countDocuments(finalQuery); /
+    const total = await LocationModel.countDocuments(finalQuery);
 
     res.status(200).json({
       success: true,

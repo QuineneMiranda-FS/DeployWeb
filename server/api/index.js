@@ -6,8 +6,7 @@ const app = express();
 const routeHandler = require("./routes");
 
 const corsOptions = {
-  // Replace with your new frontend's production URL (no trailing slash)
-  origin: process.env.FRONTEND_URL || "https://vercel.app",
+  origin: "http://localhost:5173", // chg to frontend URL
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -15,7 +14,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 // Handle preflight requests for all routes
-app.options("*", cors(corsOptions));
+app.options("/{*any}", cors(corsOptions));
 //body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -12,14 +12,13 @@ const Signup = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // POST to Express signup route
       await api.post("/auth/signup", {
         email: values.email,
         password: values.password,
       });
 
       message.success("Account created! Please login.");
-      navigate("/login"); // Redirect Login
+      navigate("/login");
     } catch (error) {
       const errorMsg = error.response?.data?.message || "Signup failed";
       message.error(errorMsg);

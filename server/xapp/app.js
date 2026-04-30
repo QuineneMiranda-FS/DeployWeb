@@ -54,5 +54,5 @@ app.use((error, req, res, next) => {
 });
 
 //connect to mongodb
-mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGO_URI);
 module.exports = app;

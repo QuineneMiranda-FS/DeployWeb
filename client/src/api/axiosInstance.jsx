@@ -2,9 +2,7 @@ import axios from "axios";
 
 const apiInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
 apiInstance.interceptors.request.use((config) => {
