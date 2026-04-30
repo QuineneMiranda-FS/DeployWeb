@@ -1,5 +1,5 @@
 require("dotenv").config();
-console.log("MONGODB_URI exists:", !!process.env.MONGODB_URI);
+console.log("MONGO_URI exists:", !!process.env.MONGO_URI);
 const mongoose = require("mongoose");
 const app = require("./api");
 const connectDB = require("./api/db/config");
