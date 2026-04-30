@@ -31,9 +31,9 @@ app.get("/", (req, res) => {
 app.use("/api", routeHandler);
 
 //Health Check Render
-app.get("/healthcheck", (req, res) => {
-  res.status(200).send("OK");
-});
+// app.get("/healthcheck", (req, res) => {
+//   res.status(200).send("OK");
+// });
 
 // 404 Handler
 app.use((req, res, next) => {
