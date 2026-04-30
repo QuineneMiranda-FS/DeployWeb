@@ -22,15 +22,13 @@ const userSchema = new mongoose.Schema({
 
 // auto hash
 userSchema.pre("save", async function () {
-  // If password isn't changed, just return (no next needed)
   if (!this.isModified("password")) return;
 
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    // In async hooks, simply finishing the function tells Mongoose to move on
   } catch (error) {
-    throw error; // This will catch any hashing errors
+    throw error;
   }
 });
 // compare pwd helper
