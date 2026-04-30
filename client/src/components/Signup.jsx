@@ -33,13 +33,13 @@ const Signup = () => {
     >
       <Card style={{ width: 400 }}>
         <Title level={3}>Create Account</Title>
-        <Form layout="vertical" onFinish={onFinish}>
+        <Form component="form" layout="vertical" onFinish={onFinish}>
           <Form.Item
             label="Email"
             name="email"
             rules={[{ required: true, type: "email" }]}
           >
-            <Input placeholder="email@example.com" />
+            <Input placeholder="email@example.com" autoComplete="username" />
           </Form.Item>
 
           <Form.Item
@@ -47,7 +47,10 @@ const Signup = () => {
             name="password"
             rules={[{ required: true, min: 6 }]}
           >
-            <Input.Password placeholder="Min 6 characters" />
+            <Input.Password
+              placeholder="Min 6 characters"
+              autoComplete="new-password"
+            />
           </Form.Item>
 
           <Button type="primary" htmlType="submit" block loading={loading}>
