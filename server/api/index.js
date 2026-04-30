@@ -14,7 +14,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 // Handle preflight requests for all routes
-app.options("/{*any}", cors(corsOptions));
+// app.options("/{*any}", cors(corsOptions));
 //body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,6 +29,11 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", routeHandler);
+
+//Health Check Render
+app.get("/healthcheck", (req, res) => {
+  res.status(200).send("OK");
+});
 
 // 404 Handler
 app.use((req, res, next) => {
