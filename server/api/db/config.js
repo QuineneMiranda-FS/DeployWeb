@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
-const uri = process.env.MONGO_URI || process.env.DATABASE_URL;
+// const uri = process.env.MONGO_URI || process.env.DATABASE_URL;
 
-if (!uri) {
-  throw new Error("CRITICAL: MONGO_URI and DATABASE_URL are both missing");
-}
+// if (!uri) {
+//   throw new Error("CRITICAL: MONGO_URI and DATABASE_URL are both missing");
+// }
 
-const conn = await mongoose.connect(uri);
+// const conn = await mongoose.connect(uri);
 
 const connectDB = async () => {
   // This will print all keys Render has injected
