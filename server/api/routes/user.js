@@ -1,41 +1,48 @@
 const express = require("express");
-const { saveUser, findUser } = require("../db/db");
 const router = express.Router();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const mongoose = require("mongoose");
 const { successTemplate, errorTemplate } = require("../../templates/templates");
 
-// GET User
-router.get("/", (req, res, next) => {
-  console.log("Getting Users");
-  findUser({})
-    .then((result) => {
-      successTemplate(res, "User Retrieved", result);
-    })
-    .catch((err) => {
-      errorTemplate(res, err.message, err.status);
-    });
+// --- SIGNUP ROUTE ---
+router.post("/signup", async (req, res) => {
+  try {
+    const newUser = new User(req.body);
+    await newUser.save();
+    successTemplate(res, "User Created", { email: newUser.email });
+  } catch (err) {
+    errorTemplate(res, "Signup failed", 400);
+  }
 });
 
-// POST - Add NEW User
-router.post("/", (req, res) => {
-  console.log("Saving User");
-  const { firstName, lastName, email } = req.body;
+// --- LOGIN ROUTE ---
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  const newUser = new User({
-    _id: new mongoose.Types.ObjectId(),
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-  });
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) return errorTemplate(res, "Invalid credentials", 400);
 
-  saveUser(newUser)
-    .then((result) => {
-      successTemplate(res, "User Saved", result);
-    })
-    .catch((err) => {
-      errorTemplate(res, err.message, err.status);
+    // Compare passwords
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return errorTemplate(res, "Invalid credentials", 400);
+
+    // Create JWT Token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
     });
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: { id: user._id, email: user.email },
+    });
+  } catch (err) {
+    errorTemplate(res, err.message, 500);
+  }
 });
 
 module.exports = router;

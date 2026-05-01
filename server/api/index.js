@@ -5,16 +5,17 @@ const cors = require("cors");
 const app = express();
 const routeHandler = require("./routes");
 
-const corsOptions = {
-  origin: "http://localhost:5173", // ***chg to frontend URL
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
+// const corsOptions = {
+//   origin: "*", // Allows any device (like your phone/emulator)
+//   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+//   credentials: true,
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 // Handle preflight requests for all routes
 // app.options("/{*any}", cors(corsOptions));
+app.use(cors());
 //body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
