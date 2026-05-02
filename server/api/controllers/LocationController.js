@@ -97,36 +97,21 @@ const getLocationById = async (req, res, next) => {
 /* istanbul ignore next */
 const createLocation = async (req, res, next) => {
   try {
-    const {
-      cityName,
-      fullCityName,
-      countryCode,
-      timeZoneId,
-      postcode,
-      region,
-    } = req.body;
+    const { cityName, countryCode } = req.body;
 
-    if (!cityName || !fullCityName) {
-      return res.status(400).json({
-        success: false,
-        message: "cityName and fullCityName are required fields",
-      });
+    let location = await LocationModel.findOne({
+      cityName: { $regex: new RegExp(`^${cityName}$`, "i") },
+      countryCode: countryCode.toUpperCase(),
+    });
+
+    if (location) {
+      return res.status(200).json({ success: true, data: location });
     }
 
-    const newRecord = await LocationModel.create({
-      cityName,
-      fullCityName,
-      countryCode,
-      timeZoneId,
-      postcode,
-      region,
-    });
+    const newLocation = new LocationModel(req.body);
+    await newLocation.save();
 
-    res.status(201).json({
-      success: true,
-      data: newRecord,
-      message: "Location created successfully",
-    });
+    res.status(201).json({ success: true, data: newLocation });
   } catch (error) {
     next(error);
   }
@@ -164,18 +149,9 @@ const updateLocationById = async (req, res, next) => {
 const deleteLocationByID = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deletedRecord = await LocationModel.findByIdAndDelete(id);
-
-    if (!deletedRecord) {
-      return res
-        .status(404)
-        .json({ success: false, message: `Location ID: ${id} not found.` });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: `Location ${id} deleted successfully`,
-    });
+    const deletedRecord = await LocationModel.findOneAndDelete({ _id: id });
+    if (!deletedRecord) return res.status(404).json({ success: false });
+    res.status(200).json({ success: true, message: `Location ${id} deleted` });
   } catch (error) {
     next(error);
   }
