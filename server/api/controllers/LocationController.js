@@ -132,9 +132,7 @@ const updateLocationById = async (req, res, next) => {
     );
 
     if (!updatedLocation) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Location not found" });
+      return res.status(404).json({ success: false, message: "Not found" });
     }
     res.status(200).json({ success: true, data: updatedLocation });
   } catch (error) {
@@ -153,9 +151,7 @@ const deleteLocationByID = async (req, res, next) => {
     const deletedRecord = await LocationModel.findOneAndDelete({ _id: id });
 
     if (!deletedRecord) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Location not found" });
+      return res.status(404).json({ success: false, message: "ID not found" });
     }
     res.status(200).json({ success: true });
   } catch (error) {
