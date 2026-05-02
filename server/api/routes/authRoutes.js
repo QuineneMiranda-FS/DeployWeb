@@ -8,18 +8,21 @@ router.post("/signup", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // check if user exists
     const existingUser = await findUser({ email });
     if (existingUser.length > 0) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // sv user automatic hash via bcrypt
     const savedUser = await saveUser({ email, password });
+
+    const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.status(201).json({
       message: "User created successfully!",
       userId: savedUser._id,
+      token: token,
     });
   } catch (error) {
     console.error(error);
