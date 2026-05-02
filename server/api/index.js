@@ -23,13 +23,11 @@ app.use((req, res, next) => {
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Woo Hoo! Service is up and running!",
-    success: true,
-  });
+  res.status(200).json({ message: "Service is up!", success: true });
 });
 
-app.use("/api", routeHandler);
+app.use("/", routeHandler);
+
 // 404 Handler
 app.use((req, res, next) => {
   const error = new Error("Not Found");
