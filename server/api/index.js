@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
   res.status(200).json({ message: "Service is up!", success: true });
 });
 
-app.use("/", routeHandler);
+app.use("/api", routeHandler);
 
 // 404 Handler
 app.use((req, res, next) => {
