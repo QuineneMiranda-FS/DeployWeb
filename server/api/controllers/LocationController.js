@@ -97,10 +97,10 @@ const getLocationById = async (req, res, next) => {
 /* istanbul ignore next */
 const createLocation = async (req, res, next) => {
   try {
-    const { cityName } = req.body;
+    const { cityName, countryCode } = req.body;
 
     let location = await LocationModel.findOne({
-      cityName: { $regex: new RegExp(`^${cityName}$`, "i") },
+      cityName: { $regex: new RegExp(`^${cityName.trim()}$`, "i") },
     });
 
     if (location) {
@@ -132,7 +132,9 @@ const updateLocationById = async (req, res, next) => {
     );
 
     if (!updatedLocation) {
-      return res.status(404).json({ success: false, message: "Not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Location not found" });
     }
     res.status(200).json({ success: true, data: updatedLocation });
   } catch (error) {
@@ -151,7 +153,9 @@ const deleteLocationByID = async (req, res, next) => {
     const deletedRecord = await LocationModel.findOneAndDelete({ _id: id });
 
     if (!deletedRecord) {
-      return res.status(404).json({ success: false, message: "Not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Location not found" });
     }
     res.status(200).json({ success: true });
   } catch (error) {

@@ -134,44 +134,31 @@ const createTimezone = async (req, res, next) => {
 const updateTimezoneById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    let { cityName, name, fullName, countryCode } = req.body;
+    const { name, fullName, cityName, countryCode } = req.body;
 
-    if (Array.isArray(cityName)) {
-      cityName = cityName[0];
-    }
-
-    const safeCityName = cityName ? String(cityName).trim() : null;
-
-    await timeZonesModel.findByIdAndUpdate(
-      id,
+    await timeZonesModel.findOneAndUpdate(
+      { _id: id },
       { name, fullName },
-      { returnDocument: "after" },
+      { new: true },
     );
 
-    if (safeCityName) {
-      let locationDoc = await LocationModel.findOne({
-        cityName: { $regex: `^${safeCityName}$`, $options: "i" },
-      });
-
-      if (!locationDoc) {
-        locationDoc = await LocationModel.create({
-          cityName: safeCityName,
-          countryCode: countryCode || "US",
-          fullCityName: safeCityName,
-        });
-      }
+    if (cityName) {
+      const trimmedCity = cityName.trim();
 
       await LocationModel.updateMany(
         { timeZoneId: id },
         { $set: { timeZoneId: null } },
       );
-      await LocationModel.findByIdAndUpdate(locationDoc._id, {
-        timeZoneId: id,
-      });
+
+      await LocationModel.findOneAndUpdate(
+        { cityName: { $regex: `^${trimmedCity}$`, $options: "i" } },
+        { timeZoneId: id, countryCode: countryCode || "US" },
+        { upsert: true, new: true },
+      );
     }
 
     const finalResult = await timeZonesModel
-      .findById(id)
+      .findOne({ _id: id })
       .populate("locationData");
     res.status(200).json({ success: true, data: finalResult });
   } catch (error) {
@@ -185,8 +172,7 @@ const updateTimezoneById = async (req, res, next) => {
 const deleteTimezoneByID = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    const deletedRecord = await timeZonesModel.findByIdAndDelete(id);
+    const deletedRecord = await timeZonesModel.findOneAndDelete({ _id: id });
 
     if (!deletedRecord) {
       return res.status(404).json({ success: false, message: "ID not found" });
@@ -196,8 +182,7 @@ const deleteTimezoneByID = async (req, res, next) => {
       { timeZoneId: id },
       { $set: { timeZoneId: null } },
     );
-
-    res.status(200).json({ success: true, message: `Deleted successfully` });
+    res.status(200).json({ success: true, message: "Deleted successfully" });
   } catch (error) {
     next(error);
   }
