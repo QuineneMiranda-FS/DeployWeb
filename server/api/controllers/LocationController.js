@@ -97,21 +97,20 @@ const getLocationById = async (req, res, next) => {
 /* istanbul ignore next */
 const createLocation = async (req, res, next) => {
   try {
-    const { cityName, countryCode } = req.body;
+    const { cityName } = req.body;
 
     let location = await LocationModel.findOne({
       cityName: { $regex: new RegExp(`^${cityName}$`, "i") },
-      countryCode: countryCode.toUpperCase(),
     });
 
     if (location) {
       return res.status(200).json({ success: true, data: location });
     }
 
-    const newLocation = new LocationModel(req.body);
-    await newLocation.save();
+    location = new LocationModel(req.body);
+    await location.save();
 
-    res.status(201).json({ success: true, data: newLocation });
+    res.status(201).json({ success: true, data: location });
   } catch (error) {
     next(error);
   }
@@ -124,18 +123,17 @@ const updateLocationById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const updatedLocation = await LocationModel.findByIdAndUpdate(
-      id,
-      req.body,
+    const { _id, ...updateData } = req.body;
+
+    const updatedLocation = await LocationModel.findOneAndUpdate(
+      { _id: id },
+      updateData,
       { new: true, runValidators: true },
-    ).populate("timeZoneId");
+    );
 
     if (!updatedLocation) {
-      return res
-        .status(404)
-        .json({ success: false, message: `Location ID: ${id} not found.` });
+      return res.status(404).json({ success: false, message: "Not found" });
     }
-
     res.status(200).json({ success: true, data: updatedLocation });
   } catch (error) {
     next(error);
@@ -149,9 +147,13 @@ const updateLocationById = async (req, res, next) => {
 const deleteLocationByID = async (req, res, next) => {
   try {
     const { id } = req.params;
+
     const deletedRecord = await LocationModel.findOneAndDelete({ _id: id });
-    if (!deletedRecord) return res.status(404).json({ success: false });
-    res.status(200).json({ success: true, message: `Location ${id} deleted` });
+
+    if (!deletedRecord) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+    res.status(200).json({ success: true });
   } catch (error) {
     next(error);
   }
