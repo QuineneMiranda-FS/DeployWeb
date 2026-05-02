@@ -1,28 +1,15 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
-
-const app = express();
 const routeHandler = require("./routes");
+
 const app = express();
 
 app.set("etag", false);
-
-// const corsOptions = {
-//   origin: "*", // Allows any device (like your phone/emulator)
-//   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-//   allowedHeaders: ["Content-Type", "Authorization"],
-//   credentials: true,
-// };
-
-// app.use(cors(corsOptions));
-// Handle preflight requests for all routes
-// app.options("/{*any}", cors(corsOptions));
 app.use(cors());
-//body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-//middleware
+
 app.use((req, res, next) => {
   res.set(
     "Cache-Control",
@@ -33,7 +20,6 @@ app.use((req, res, next) => {
   next();
 });
 
-//flag http calls
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
@@ -44,12 +30,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", routeHandler);
-
-//Health Check Render
-// app.get("/healthcheck", (req, res) => {
-//   res.status(200).send("OK");
-// });
-
 // 404 Handler
 app.use((req, res, next) => {
   const error = new Error("Not Found");
